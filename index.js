@@ -23,19 +23,14 @@ function minargs(argv, options = {}) {
     multiples: [],
     alias: {},
     strict: false,
-    positionalValues: false,
-    process: true
+    positionalValues: false
   }
   options = Object.assign(defaults, options)
 
   // default to process.argv
   const start = mainArgs()
   argv = argv || process.argv.slice(start)
-
-  // check if we should add process positionals to result
-  if (options.process) {
-    result.process = process.argv.slice(0, start)
-  }
+  result.process = process.argv.slice(0, start)
 
   // throw if in strict mode & passed argv was invalid input
   if (options.strict && !Array.isArray(argv)) {
@@ -66,10 +61,13 @@ function minargs(argv, options = {}) {
     }
   }
 
-  // return early an empty result if passed value isn't a string
+  // return early an empty result if passed value isn't an array
   if (!Array.isArray(argv)) {
     return result
   }
+
+  // set known args
+  options.known.map(name => store(name, false))
 
   // walk args
   let pos = 0
