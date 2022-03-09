@@ -19,7 +19,6 @@ function minArgs(argv, options = {}) {
   // set option defaults
   const defaults = {
     known: [],
-    values: [],
     multiples: [],
     alias: {},
     strict: false,
@@ -49,6 +48,8 @@ function minArgs(argv, options = {}) {
     result.args[name] = true
 
     // check if we should store values
+    value = value || ''
+
     // push if set already & multiple
     if (result.values[name] && options.multiples.includes(name)) {
       result.values[name].push(value)
@@ -97,13 +98,13 @@ function minArgs(argv, options = {}) {
           const parts = arg.split('=')
           // expand & set short existence
           const shorts = parts[0].split('').map(name => options.alias[name] || name)
-          shorts.map(name => store(name, undefined))
+          shorts.slice(0, -1).map(name => store(name, ''))
           arg = shorts.pop() + '=' + parts[1]
 
         // set arg to last short for usage by positional values
         } else {
           const shorts = arg.split('').map(name => options.alias[name] || name)
-          shorts.map(name => store(name, undefined))
+          shorts.slice(0, -1).map(name => store(name, ''))
           arg = shorts.pop()
         }
 
@@ -122,12 +123,12 @@ function minArgs(argv, options = {}) {
       } else if (pos + 1 < argv.length &&
                 !argv[pos + 1].startsWith('-') &&
                 options.positionalValues) {
-
-        const val = options.values.includes(arg) ? argv[++pos] : undefined
-        store(arg, val)
+        store(arg, argv[++pos])
 
       } else {
-        store(arg, undefined)
+
+        store(arg)
+
       }
 
     // Arguments without a dash prefix are considered "positional"

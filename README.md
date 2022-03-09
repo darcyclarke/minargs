@@ -25,7 +25,6 @@ args.
 #### Options
 
 - `known` (`Array`) Default: none
-- `values` (`Array`) Default: none
 - `multiples` (`Array`) Default: none
 - `strict` (`Boolean`) Default: `false`
   - If an argument is found that isn't defined in `known`, throw a usage error
@@ -36,7 +35,6 @@ args.
 ```js
 {
   args: {},
-  values: {},
   positionals: [],
   remainder: [],
   process: []
@@ -46,13 +44,12 @@ args.
 ##### `args`
 
 ##### `values`
-- Returned values are `undefined` by default
-- Returned values are strings if if the corresponding arg was defined `values`
-- Returned values are an array of strings if the corresponding arg was defined in `values` & `multiples`
+- Returned values are a string by default
+- Returned values are an array of strings if the corresponding arg was defined in `multiples`
 - **Examples:**
   - `--foo=bar` will return `undefined` with no configuration
-  - `--foo=bar` will return `"bar"` when `'foo'` is defined in `values`
-  - `--foo bar` will return `"bar"` when `'foo'` is defined in `values` & `positionalValues` is `true`
+  - `--foo=bar` will return `"bar"` when `'foo'`
+  - `--foo bar` will return `"bar"` when `'foo'` & `positionalValues` is `true`
     - Notably, `bar` is treated as a positional & returned in `positionals` if `positionalValues` is `false`
 
 ##### `positionals`
@@ -82,7 +79,6 @@ minargs "<args>" [<options>]
 
 #### Options
 - `--known` (alias: `k`)
-- `--value` (alias: `v`)
 - `--multiple` (alias: `m`)
 - `--alias` (alias: `a`)
 - `--positionalValues` (alias: `p`) Default: `false`
@@ -125,8 +121,8 @@ minargs "--foo -f -f -ffff" -m foo -a f:foo | jq.values.length
 ##### Are shorts supported?
 - Yes.
 - `-a` & `-aCdeFg` are supported
-- `-a=b` will capture & return `"b"` as a value if `'a'` is defined in `values`
-- `-a b` will capture & return `"b"` as a value if `'a'` is defined in `values` &  `positionalValues` is `true` in the options provided (ex. `{}`)
+- `-a=b` will capture & return `"b"` as a value
+- `-a b` will capture & return `"b"` as a value if  `positionalValues` is `true`
 
 ##### What is an `alias`?
 - An alias can be any other string that maps to the *canonical* option; this includes single characters which will map shorts to a long-form (ex. `alias: { f: foo }` will parse `-f` as `{ args: { 'foo': true } }`)

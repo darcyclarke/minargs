@@ -1,84 +1,92 @@
 const t = require('tap')
 const { minArgs, mainArgs } = require('../index.js')
 const _process = process
-const blank = {
-  args: {},
-  values: {},
-  positionals: [],
-  remainder: [],
-  process: process.argv.slice(0, mainArgs())
-}
+let result, options, argv
 
 t.beforeEach(t => {
   process = _process
+  argv = []
+  options = {}
+  result = {
+    args: {},
+    values: {},
+    positionals: [],
+    remainder: [],
+    process: process.argv.slice(0, mainArgs())
+  }
 })
 
 t.test('minArgs : return blank when bad argument', t => {
   t.plan(1)
-  t.same(minArgs(null), blank)
+  t.same(minArgs(null), result)
 })
 
 t.test('minArgs : defaults to process.argv when no array passed', t => {
   t.plan(1)
-  t.same(minArgs(), blank)
+  t.same(minArgs(), result)
 })
 
 t.test('minArgs : parses shorts', t => {
   t.plan(1)
-  let result = Object.assign({}, blank)
   result.args = {
     f: true,
     o: true
   }
   result.values = {
-    f: undefined,
-    o: undefined
+    f: '',
+    o: ''
   }
   t.same(minArgs(['-foo']), result)
 })
 
-t.test('minArgs : parses values setting by default', t => {
+t.test('minArgs : parses & stores values by default', t => {
   t.plan(1)
-  let result = Object.assign({}, blank)
-  result.args = {
-    f: true,
-    o: true
-  }
-  result.values = {
-    f: undefined,
-    o: 'bar'
-  }
-  t.same(minArgs(['-foo=bar']), result)
-})
-
-
-t.test('minArgs : parses & stores values when values set', t => {
-  t.plan(1)
-  let options = {
+  options = {
     values: ['foo']
   }
-  let result = Object.assign({}, blank)
   result.args.foo = true
   result.values.foo = 'bar'
   t.same(minArgs(['--foo=bar']), result)
 })
 
+t.test('minArgs : supports parsing multiple values', t => {
+  t.plan(1)
+  options = {
+    multiples: ['f', 'o']
+  }
+  result.args.f = true
+  result.args.o = true
+  result.values.f = ['']
+  result.values.o = ['', '']
+  t.same(minArgs(['-foo'], options), result)
+})
+
+t.test('minArgs : parses & stores values when values set & multiple shorts passed', t => {
+  t.plan(1)
+  options = {
+    multiples: ['f', 'o']
+  }
+  result.args.f = true
+  result.args.o = true
+  result.values.f = ['']
+  result.values.o = ['', 'bar']
+  t.same(minArgs(['-foo=bar'], options), result)
+})
+
 t.test('minArgs : parses positonals by default', t => {
   t.plan(1)
-  let result = Object.assign({}, blank)
   result.args.foo = true
-  result.values.foo = undefined
+  result.values.foo = ''
   result.positionals = ['bar']
   t.same(minArgs(['--foo', 'bar']), result)
 })
 
 t.test('minArgs : parses positonals as option values when positionalValues & values is set', t => {
   t.plan(1)
-  let options = {
+  options = {
     values: ['foo'],
     positionalValues: true
   }
-  let result = Object.assign({}, blank)
   result.args.foo = true
   result.values.foo = 'bar'
   result.positionals = []
@@ -87,9 +95,8 @@ t.test('minArgs : parses positonals as option values when positionalValues & val
 
 t.test('minArgs : parses array when passed', t => {
   t.plan(1)
-  let result = Object.assign({}, blank)
   result.args.foo = true
-  result.values.foo = undefined
+  result.values.foo = ''
   t.same(minArgs(['--foo']), result)
 })
 
