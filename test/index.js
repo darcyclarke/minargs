@@ -16,9 +16,9 @@ t.beforeEach(t => {
   }
 })
 
-t.test('minArgs : return blank when bad argument', t => {
+t.test('minArgs : fail silently & return blank result when bad argument', t => {
   t.plan(1)
-  t.same(minArgs(null), result)
+  t.same(minArgs('argv'), result)
 })
 
 t.test('minArgs : throws usage error when passed a bad argument in \'strict\' mode', t => {
@@ -27,7 +27,7 @@ t.test('minArgs : throws usage error when passed a bad argument in \'strict\' mo
     strict: true
   }
   let expected = new Error('usage error: argv must be an array')
-  t.throws(function () { minArgs('foo', options) }, expected)
+  t.throws(function () { minArgs('argv', options) }, expected)
 })
 
 t.test('minArgs : defaults to process.argv when no array passed', t => {
@@ -94,6 +94,30 @@ t.test('minArgs : parses & stores values when multiple shorts passed & positiona
   result.values.o = ['', 'bar']
   t.same(minArgs(['-foo', 'bar'], options), result)
 })
+
+t.test('minArgs : support known arguments', t => {
+  t.plan(1)
+  options = {
+    known: ['foo', 'bar']
+  }
+  result.args.foo = true
+  result.args.bar = false
+  result.values.foo = ''
+  result.values.bar = ''
+  t.same(minArgs(['--foo'], options), result)
+})
+
+
+t.test('minArgs : throw when in strict mode & unknown arguments passed', t => {
+  t.plan(1)
+  options = {
+    known: ['foo'],
+    strict: true
+  }
+  let expected = new Error('unknown option: bar')
+  t.throws(function () { minArgs(['--foo', '--bar'], options) }, expected)
+})
+
 
 t.test('minArgs : support bare \'-\' as a positional', t => {
   t.plan(1)
@@ -184,16 +208,19 @@ t.test('mainArgs : returns 1 when includes --print', t => {
   t.equal(mainArgs(), 1)
 })
 
-t.test('mainArgs : returns 1 when versions.electron is set with defaultApp', t => {
+t.test('mainArgs : returns 1 when versions.electron isn\'t defaultApp', t => {
   t.plan(1)
-  process.versions = { electron: true }
-  process.defaultApp = true
+  process.versions = {}
+  process.versions.electron = true
+  process.defaultApp = false
   t.equal(mainArgs(), 1)
 })
 
 t.test('mainArgs : returns 2 by default', t => {
   t.plan(1)
+  process.versions = {}
+  process.defaultApp = true
   process.execArgv = []
-  process.versions = null
+  process.versions = false
   t.equal(mainArgs(), 2)
 })

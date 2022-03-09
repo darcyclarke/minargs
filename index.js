@@ -28,12 +28,17 @@ function minArgs(argv, options = {}) {
 
   // default to process.argv
   const start = mainArgs()
-  argv = argv || process.argv.slice(start)
+  argv = (typeof argv != 'undefined') ? argv : process.argv.slice(start)
   result.process = process.argv.slice(0, start)
 
   // throw if in strict mode & passed argv was invalid input
   if (options.strict && !Array.isArray(argv)) {
     throw new Error('usage error: argv must be an array')
+  }
+
+  // return early an empty result if passed value isn't an array
+  if (!Array.isArray(argv)) {
+    return result
   }
 
   // set arg, value
@@ -43,15 +48,15 @@ function minArgs(argv, options = {}) {
     name = options.alias[name] || name
 
     // check if errors should be thrown
-    if (options.strict && !known.includes(name)) {
-      throw new Error('unknown option:', name)
+    if (options.strict && !options.known.includes(name)) {
+      throw new Error(`unknown option: ${name}`)
     }
 
     // set existence of arg
     result.args[name] = true
 
     // check if we should store values
-    value = value || ''
+    value = (typeof value != 'undefined') ? value : ''
 
     // push if set already & multiple
     if (result.values[name] && options.multiples.includes(name)) {
@@ -65,13 +70,11 @@ function minArgs(argv, options = {}) {
     }
   }
 
-  // return early an empty result if passed value isn't an array
-  if (!Array.isArray(argv)) {
-    return result
-  }
-
   // set known args initial existence
-  options.known.map(name => store(name, false))
+  options.known.map(name => {
+    result.args[name] = false
+    result.values[name] = ''
+  })
 
   // walk args
   let pos = 0
