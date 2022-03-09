@@ -1,6 +1,6 @@
 'use strict'
 
-function minargs(argv, options = {}) {
+function minArgs(argv, options = {}) {
 
   // setup result object definitions
   let result = {
@@ -66,7 +66,7 @@ function minargs(argv, options = {}) {
     return result
   }
 
-  // set known args
+  // set known args initial existence
   options.known.map(name => store(name, false))
 
   // walk args
@@ -172,6 +172,7 @@ function mainArgs() {
 }
 
 module.exports = {
-  minargs,
+  minargs: minArgs,
+  minArgs,
   mainArgs
 }

@@ -16,9 +16,10 @@ npm install minargs
 #### Usage
 
 ```js
+// program.js - --foo=bar
 const { minargs } = require('minargs')
 const { args } = minargs()
-
+args.
 ```
 
 #### Options
@@ -30,7 +31,7 @@ const { args } = minargs()
   - If an argument is found that isn't defined in `known`, throw a usage error
 - `positionalValues` (`Boolean`) Default: `false`
 
-#### Return
+#### Response Object
 
 ```js
 {
@@ -41,6 +42,24 @@ const { args } = minargs()
   process: []
 }
 ```
+
+##### `args`
+
+##### `values`
+- Returned values are `undefined` by default
+- Returned values are strings if if the corresponding arg was defined `values`
+- Returned values are an array of strings if the corresponding arg was defined in `values` & `multiples`
+- **Examples:**
+  - `--foo=bar` will return `undefined` with no configuration
+  - `--foo=bar` will return `"bar"` when `'foo'` is defined in `values`
+  - `--foo bar` will return `"bar"` when `'foo'` is defined in `values` & `positionalValues` is `true`
+    - Notably, `bar` is treated as a positional & returned in `positionals` if `positionalValues` is `false`
+
+##### `positionals`
+
+##### `remainder`
+
+##### `process`
 
 ## CLI
 
@@ -84,18 +103,30 @@ minargs "--foo -f -f -ffff" -m foo -a f:foo | jq.values.length
 
 ### Extended Use Cases
 
+```js
+```
+
 #### Handling usage
+
+```js
+```
 
 #### Handling validation
 
+```js
+```
+
 #### Handling recursive parsing
 
+```js
+```
 
 ### F.A.Q.
-
 ##### Are shorts supported?
 - Yes.
-- `-a`, `-a=b`, `-a b` & `-aCdeFg` are all supported formats/definitions
+- `-a` & `-aCdeFg` are supported
+- `-a=b` will capture & return `"b"` as a value if `'a'` is defined in `values`
+- `-a b` will capture & return `"b"` as a value if `'a'` is defined in `values` &  `positionalValues` is `true` in the options provided (ex. `{}`)
 
 ##### What is an `alias`?
 - An alias can be any other string that maps to the *canonical* option; this includes single characters which will map shorts to a long-form (ex. `alias: { f: foo }` will parse `-f` as `{ args: { 'foo': true } }`)
@@ -145,4 +176,4 @@ minargs "--foo -f -f -ffff" -m foo -a f:foo | jq.values.length
 - `--foo` returns `{ args: { 'foo': true }`
 
 ### Notes
-<sup>*</sup> `minargs` does support *"validation"* of the **existence** of `known` args when `strict=true`. If you're using `strict=true` you should likely wrap the call in a `try{}catch(e){}` or `util.promisify()`
+<sup>*</sup> `minargs` does support *"validation"* of the **existence** of `known` args when `strict=true`. If you're using `strict=true` you should likely wrap the call in a `try{}catch(e){}` or `util.promisify()` as it will `throw` when unknown args are passed
