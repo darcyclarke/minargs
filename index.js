@@ -89,11 +89,23 @@ function minArgs(argv, options = {}) {
 
       // Handle shorts (ie. '-x')
       } else if (arg.charAt(1) !== '-') {
-        // expand & set short existence
+
         arg = arg.slice(1, arg.length)
-        arg.split('').map(name => {
-          store(options.alias[name] || name, undefined)
-        })
+
+        // Handle short value setting
+        if (arg.includes('=')) {
+          const parts = arg.split('=')
+          // expand & set short existence
+          const shorts = parts[0].split('').map(name => options.alias[name] || name)
+          shorts.map(name => store(name, undefined))
+          arg = shorts.pop() + '=' + parts[1]
+
+        // set arg to last short for usage by positional values
+        } else {
+          const shorts = arg.split('').map(name => options.alias[name] || name)
+          shorts.map(name => store(name, undefined))
+          arg = shorts.pop()
+        }
 
       } else {
         // remove leading '--'
@@ -103,9 +115,8 @@ function minArgs(argv, options = {}) {
       // Handel equal values (ie. '--foo=b')
       if (arg.includes('=')) {
 
-        const i = arg.indexOf('=')
-        const val = options.values.includes(arg) ? arg.slice(i + 1) : undefined
-        store(arg.slice(0, i), val)
+        const parts = arg.split('=')
+        store(parts[0], parts[1])
 
       // Handle positional values (ie. '--foo b')
       } else if (pos + 1 < argv.length &&
@@ -137,7 +148,6 @@ function minArgs(argv, options = {}) {
 // https://github.com/pkgjs/parseargs/blob/main/index.js
 
 function mainArgs() {
-
   // This function is a placeholder for proposed process.mainArgs.
   // Work out where to slice process.argv for user supplied arguments.
 
