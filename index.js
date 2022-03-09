@@ -39,6 +39,9 @@ function minArgs(argv, options = {}) {
   // set arg, value
   function store(name, value) {
 
+    // check for alias
+    name = options.alias[name] || name
+
     // check if errors should be thrown
     if (options.strict && !known.includes(name)) {
       throw new Error('unknown option:', name)
@@ -97,13 +100,13 @@ function minArgs(argv, options = {}) {
         if (arg.includes('=')) {
           const parts = arg.split('=')
           // expand & set short existence
-          const shorts = parts[0].split('').map(name => options.alias[name] || name)
+          const shorts = parts[0].split('')
           shorts.slice(0, -1).map(name => store(name, ''))
           arg = shorts.pop() + '=' + parts[1]
 
         // set arg to last short for usage by positional values
         } else {
-          const shorts = arg.split('').map(name => options.alias[name] || name)
+          const shorts = arg.split('')
           shorts.slice(0, -1).map(name => store(name, ''))
           arg = shorts.pop()
         }

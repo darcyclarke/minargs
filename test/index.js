@@ -21,6 +21,15 @@ t.test('minArgs : return blank when bad argument', t => {
   t.same(minArgs(null), result)
 })
 
+t.test('minArgs : throws usage error when passed a bad argument in \'strict\' mode', t => {
+  t.plan(1)
+  options = {
+    strict: true
+  }
+  let expected = new Error('usage error: argv must be an array')
+  t.throws(function () { minArgs('foo', options) }, expected)
+})
+
 t.test('minArgs : defaults to process.argv when no array passed', t => {
   t.plan(1)
   t.same(minArgs(), result)
@@ -61,7 +70,7 @@ t.test('minArgs : supports parsing multiple values', t => {
   t.same(minArgs(['-foo'], options), result)
 })
 
-t.test('minArgs : parses & stores values when values set & multiple shorts passed', t => {
+t.test('minArgs : parses & stores values when multiple shorts passed', t => {
   t.plan(1)
   options = {
     multiples: ['f', 'o']
@@ -73,12 +82,39 @@ t.test('minArgs : parses & stores values when values set & multiple shorts passe
   t.same(minArgs(['-foo=bar'], options), result)
 })
 
-t.test('minArgs : parses positonals by default', t => {
+t.test('minArgs : parses & stores values when multiple shorts passed & positional value', t => {
+  t.plan(1)
+  options = {
+    multiples: ['f', 'o'],
+    positionalValues: true
+  }
+  result.args.f = true
+  result.args.o = true
+  result.values.f = ['']
+  result.values.o = ['', 'bar']
+  t.same(minArgs(['-foo', 'bar'], options), result)
+})
+
+t.test('minArgs : support bare \'-\' as a positional', t => {
   t.plan(1)
   result.args.foo = true
   result.values.foo = ''
+  result.positionals = ['-', 'bar']
+  t.same(minArgs(['--foo', '-', 'bar']), result)
+})
+
+t.test('minArgs : support bare \'--\' to mark end of parsing & return remainder', t => {
+  t.plan(1)
+  result.args.foo = true
+  result.values.foo = ''
+  result.remainder = ['bar']
+  t.same(minArgs(['--foo', '--', 'bar']), result)
+})
+
+t.test('minArgs : parses positonals by default', t => {
+  t.plan(1)
   result.positionals = ['bar']
-  t.same(minArgs(['--foo', 'bar']), result)
+  t.same(minArgs(['bar']), result)
 })
 
 t.test('minArgs : parses positonals as option values when positionalValues & values is set', t => {
@@ -98,6 +134,30 @@ t.test('minArgs : parses array when passed', t => {
   result.args.foo = true
   result.values.foo = ''
   t.same(minArgs(['--foo']), result)
+})
+
+t.test('minArgs : supports shorts aliasing to long-form', t => {
+  t.plan(1)
+  options = {
+    alias: {
+      f: 'foo'
+    }
+  }
+  result.args.foo = true
+  result.values.foo = ''
+  t.same(minArgs(['-f'], options), result)
+})
+
+t.test('minArgs : supports aliasing', t => {
+  t.plan(1)
+  options = {
+    alias: {
+      f: 'foo'
+    }
+  }
+  result.args.foo = true
+  result.values.foo = ''
+  t.same(minArgs(['--f'], options), result)
 })
 
 t.test('mainArgs : returns 1 when includes -e', t => {
