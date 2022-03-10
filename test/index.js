@@ -61,7 +61,7 @@ t.test('minArgs : parses & stores values by default', t => {
 t.test('minArgs : supports parsing multiple values', t => {
   t.plan(1)
   options = {
-    multiples: ['f', 'o']
+    multiple: ['f', 'o']
   }
   result.args.f = true
   result.args.o = true
@@ -73,7 +73,7 @@ t.test('minArgs : supports parsing multiple values', t => {
 t.test('minArgs : parses & stores values when multiple shorts passed', t => {
   t.plan(1)
   options = {
-    multiples: ['f', 'o']
+    multiple: ['f', 'o']
   }
   result.args.f = true
   result.args.o = true
@@ -82,10 +82,10 @@ t.test('minArgs : parses & stores values when multiple shorts passed', t => {
   t.same(minArgs(['-foo=bar'], options), result)
 })
 
-t.test('minArgs : parses & stores values when multiple shorts passed & positional value', t => {
+t.test('minArgs : parses & stores values when multiple shorts passed w/ positionalValue', t => {
   t.plan(1)
   options = {
-    multiples: ['f', 'o'],
+    multiple: ['f', 'o'],
     positionalValues: true
   }
   result.args.f = true

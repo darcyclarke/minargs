@@ -9,10 +9,32 @@
   "bin": {
     "minargs": "bin/cli.js"
   },
-  "keywords": [],
-  "author": "",
+  "author": {
+    "name": "Darcy Clarke",
+    "email": "darcy@darcyclarke.me",
+    "url": "https://darcyclarke.me"
+  },
   "license": "ISC",
   "devDependencies": {
     "tap": "^15.1.6"
-  }
+  },
+  "keywords": [
+    "argument",
+    "options",
+    "flags",
+    "values",
+    "positionals",
+    "parsing",
+    "strict",
+    "arg",
+    "argv",
+    "process",
+    "nopt",
+    "commander",
+    "minimist",
+    "yargs",
+    "parseargs",
+    "cli",
+    "tool"
+  ]
 }

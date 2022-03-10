@@ -19,7 +19,7 @@ function minArgs(argv, options = {}) {
   // set option defaults
   const defaults = {
     known: [],
-    multiples: [],
+    multiple: [],
     alias: {},
     strict: false,
     positionalValues: false
@@ -28,7 +28,7 @@ function minArgs(argv, options = {}) {
 
   // default to process.argv
   const start = mainArgs()
-  argv = (typeof argv != 'undefined') ? argv : process.argv.slice(start)
+  argv = typeof argv != 'undefined' ? argv : process.argv.slice(start)
   result.process = process.argv.slice(0, start)
 
   // throw if in strict mode & passed argv was invalid input
@@ -59,10 +59,10 @@ function minArgs(argv, options = {}) {
     value = (typeof value != 'undefined') ? value : ''
 
     // push if set already & multiple
-    if (result.values[name] && options.multiples.includes(name)) {
+    if (result.values[name] && options.multiple.includes(name)) {
       result.values[name].push(value)
     // create array value if doesn't exist
-    } else if (options.multiples.includes(name)) {
+    } else if (options.multiple.includes(name)) {
       result.values[name] = [value]
     // fallback to singular value
     } else {
@@ -105,13 +105,13 @@ function minArgs(argv, options = {}) {
           // expand & set short existence
           const shorts = parts[0].split('')
           shorts.slice(0, -1).map(name => store(name, ''))
-          arg = shorts.pop() + '=' + parts[1]
+          arg = shorts[shorts.length - 1] + '=' + parts[1]
 
         // set arg to last short for usage by positional values
         } else {
           const shorts = arg.split('')
           shorts.slice(0, -1).map(name => store(name, ''))
-          arg = shorts.pop()
+          arg = shorts[shorts.length - 1]
         }
 
       } else {
