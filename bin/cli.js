@@ -87,10 +87,10 @@ function run (argv) {
       known: !values.known ? [] : values.known,
       multiple: !values.multiple ? [] : values.multiple,
       alias: !values.alias ? [] : values.alias.reduce((o, v) => {
-          const parts = v.split(':')
-          o[parts[0]] = parts[1]
-          return o
-        }, {})
+        const parts = v.split(':')
+        o[parts[0]] = parts[1]
+        return o
+      }, {})
     }
     console.log(JSON.stringify(minargs(argv, opts), null, 2))
     process.exit(0)
@@ -100,7 +100,7 @@ function run (argv) {
   }
 }
 
-function printUsage() {
+function printUsage () {
   console.log('')
   console.log('Usage:')
   console.log('')
@@ -147,7 +147,7 @@ function parseString (value) {
   return arr
 }
 
-function firstString() {
+function firstString () {
   var args = []
   for (var _i = 0; _i < arguments.length; _i++) {
     args[_i] = arguments[_i]

@@ -1,11 +1,10 @@
 const t = require('tap')
 const { minArgs, mainArgs } = require('../index.js')
 const _process = process
-let result, options, argv
+let result, options
 
 t.beforeEach(t => {
   process = _process
-  argv = []
   options = {}
   result = {
     args: {},
@@ -107,7 +106,6 @@ t.test('minArgs : support known arguments', t => {
   t.same(minArgs(['--foo'], options), result)
 })
 
-
 t.test('minArgs : throw when in strict mode & unknown arguments passed', t => {
   t.plan(1)
   options = {
@@ -117,7 +115,6 @@ t.test('minArgs : throw when in strict mode & unknown arguments passed', t => {
   let expected = new Error('unknown option: bar')
   t.throws(function () { minArgs(['--foo', '--bar'], options) }, expected)
 })
-
 
 t.test('minArgs : support bare \'-\' as a positional', t => {
   t.plan(1)

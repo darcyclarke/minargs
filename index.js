@@ -1,7 +1,6 @@
 'use strict'
 
-function minArgs(argv, options = {}) {
-
+function minArgs (argv, options = {}) {
   // setup result object definitions
   let result = {
     args: {},
@@ -28,7 +27,7 @@ function minArgs(argv, options = {}) {
 
   // default to process.argv
   const start = mainArgs()
-  argv = typeof argv != 'undefined' ? argv : process.argv.slice(start)
+  argv = typeof argv !== 'undefined' ? argv : process.argv.slice(start)
   result.process = process.argv.slice(0, start)
 
   // throw if in strict mode & passed argv was invalid input
@@ -42,8 +41,7 @@ function minArgs(argv, options = {}) {
   }
 
   // set arg, value
-  function store(name, value) {
-
+  function store (name, value) {
     // check for alias
     name = options.alias[name] || name
 
@@ -56,7 +54,7 @@ function minArgs(argv, options = {}) {
     result.args[name] = true
 
     // check if we should store values
-    value = (typeof value != 'undefined') ? value : ''
+    value = (typeof value !== 'undefined') ? value : ''
 
     // push if set already & multiple
     if (result.values[name] && options.multiple.includes(name)) {
@@ -96,7 +94,6 @@ function minArgs(argv, options = {}) {
 
       // Handle shorts (ie. '-x')
       } else if (arg.charAt(1) !== '-') {
-
         arg = arg.slice(1, arg.length)
 
         // Handle short value setting
@@ -113,7 +110,6 @@ function minArgs(argv, options = {}) {
           shorts.slice(0, -1).map(name => store(name, ''))
           arg = shorts[shorts.length - 1]
         }
-
       } else {
         // remove leading '--'
         arg = arg.slice(2)
@@ -121,7 +117,6 @@ function minArgs(argv, options = {}) {
 
       // Handel equal values (ie. '--foo=b')
       if (arg.includes('=')) {
-
         const parts = arg.split('=')
         store(parts[0], parts[1])
 
@@ -130,11 +125,8 @@ function minArgs(argv, options = {}) {
                 !argv[pos + 1].startsWith('-') &&
                 options.positionalValues) {
         store(arg, argv[++pos])
-
       } else {
-
         store(arg)
-
       }
 
     // Arguments without a dash prefix are considered "positional"
@@ -154,7 +146,7 @@ function minArgs(argv, options = {}) {
 // https://github.com/pkgjs/parseargs
 // https://github.com/pkgjs/parseargs/blob/main/index.js
 
-function mainArgs() {
+function mainArgs () {
   // This function is a placeholder for proposed process.mainArgs.
   // Work out where to slice process.argv for user supplied arguments.
 

@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "tap"
+    "test": "tap",
+    "lint": "eslint"
   },
   "bin": {
     "minargs": "bin/cli.js"
@@ -14,10 +15,22 @@
     "email": "darcy@darcyclarke.me",
     "url": "https://darcyclarke.me"
   },
-  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https:///github.com/darcyclarke/minargs"
+  },
+  "engines": {
+    "node": "^12.13.0 || ^14.15.0 || >=16"
+  },
+  "license": "Apache-2.0",
   "devDependencies": {
+    "eslint": "^7.18.0",
     "tap": "^15.1.6"
   },
+  "bugs": {
+    "url": "https://github.com/darcyclarke/minargs/issues"
+  },
+  "homepage": "https://github.com/darcyclarke/minargs#readme",
   "keywords": [
     "argument",
     "options",
