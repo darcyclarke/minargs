@@ -171,5 +171,8 @@ minargs "--foo -f -f -ffff" -m foo -a f:foo | jq.values.length
 - `---foo` returns `{ args: '-foo': true }`
 - `--foo` returns `{ args: { 'foo': true }`
 
+##### Is `foo=bar` a positional?
+- Yes.
+
 ### Notes
 <sup>*</sup> `minargs` does support *"validation"* of the **existence** of `known` args when `strict=true`. If you're using `strict=true` you should likely wrap the call in a `try{}catch(e){}` or `util.promisify()` as it will `throw` when unknown args are passed
