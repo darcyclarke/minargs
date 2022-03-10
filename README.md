@@ -18,8 +18,11 @@ npm install minargs
 ```js
 // program.js - --foo=bar
 const { minargs } = require('minargs')
-const { args } = minargs()
-args.
+const { args, values, positionals } = minargs()
+
+args.foo // true
+values.foo // 'bar'
+positionals // ['-']
 ```
 
 #### Options
@@ -35,6 +38,7 @@ args.
 ```js
 {
   args: {},
+  values: {},
   positionals: [],
   remainder: [],
   process: []
