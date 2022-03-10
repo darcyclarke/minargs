@@ -1,19 +1,19 @@
 # minargs
 
-#### Goals
+### Goals
 - **no validation<sup><small>*</small></sup>** (aka. *"bring your own validation"* ™️)
 - **minimal** configuration
 - **minimal** assumptions
 
 ## Package
 
-#### Installation
+### Installation
 
 ```bash
 npm install minargs
 ```
 
-#### Usage
+### Usage
 
 ```js
 // program.js - --foo=bar
@@ -25,7 +25,7 @@ values.foo // 'bar'
 positionals // ['-']
 ```
 
-#### Options
+### Options
 
 - `known` (`Array`) Default: none
 - `multiples` (`Array`) Default: none
@@ -33,7 +33,7 @@ positionals // ['-']
   - If an argument is found that isn't defined in `known`, throw a usage error
 - `positionalValues` (`Boolean`) Default: `false`
 
-#### Response Object
+### Response Object
 
 ```js
 {
@@ -66,7 +66,7 @@ positionals // ['-']
 
 `minargs` comes with a CLI out-of-the-box to make it a little easier to try/use the parser & test any assumptions about input.
 
-#### Installation
+### Installation
 ```bash
 # install package globally & call bin...
 npm install minargs -g && minargs
@@ -81,22 +81,22 @@ npx minargs
 minargs "<args>" [<options>]
 ```
 
-#### Options
+### Options
 - `--known` (alias: `k`)
 - `--multiple` (alias: `m`)
 - `--alias` (alias: `a`)
 - `--positionalValues` (alias: `p`) Default: `false`
 - `--strict` (alias: `s`) Default: `false`
 
-#### Examples
+### Examples
 
-##### Get the # of times a arg was defined (using multiples & alias')...
+#### Get the # of times a arg was defined (using multiples & alias')...
 
 ```bash
 minargs "--foo -f -f -ffff" -m foo -a f:foo | jq.values.length
 ```
 
-##### Piping to/reading from `stdin`...
+#### Piping to/reading from `stdin`...
 ```bash
 "--foo --bar baz" | minargs -k bar -v bar -s
 ```
@@ -122,60 +122,60 @@ minargs "--foo -f -f -ffff" -m foo -a f:foo | jq.values.length
 ```
 
 ### F.A.Q.
-##### Are shorts supported?
+#### Are shorts supported?
 - Yes.
 - `-a` & `-aCdeFg` are supported
 - `-a=b` will capture & return `"b"` as a value
 - `-a b` will capture & return `"b"` as a value if  `positionalValues` is `true`
 
-##### What is an `alias`?
+#### What is an `alias`?
 - An alias can be any other string that maps to the *canonical* option; this includes single characters which will map shorts to a long-form (ex. `alias: { f: foo }` will parse `-f` as `{ args: { 'foo': true } }`)
 
-##### Is `cmd --foo=bar baz` the same as `cmd baz --foo=bar`?
+#### Is `cmd --foo=bar baz` the same as `cmd baz --foo=bar`?
 - Yes.
 
-##### Is value validation or type cohersion supported?
+#### Is value validation or type cohersion supported?
 - No.
 
-##### Are usage errors supported?
+#### Are usage errors supported?
 - No.
 
-##### Does `--no-foo` coerce to `--foo=false`?
+#### Does `--no-foo` coerce to `--foo=false`?
 - No.
 - It would set `{ args: { 'no-foo': true } }`
 
-##### Is `--foo` the same as `--foo=true`?
+#### Is `--foo` the same as `--foo=true`?
 - No.
 
-##### Are environment variables supported?
+#### Are environment variables supported?
 - No.
 
-##### Do unknown arguments raise an error?
+#### Do unknown arguments raise an error?
 - When `strict=false`, no.
 - When `strict=true`, yes.
 
-##### Does `--` signal the end of flags/options?
+#### Does `--` signal the end of flags/options?
 - Yes.
 - Any arguments following a bare `--` definition will be returned in `remainder`.
 
-##### Is a value stored to represent the existence of `--`?
+#### Is a value stored to represent the existence of `--`?
 - No.
 - The only way to determine if `--` was present & there were arguments passed afterward is to check the value of `remainder`
 
-##### Is `-` a positional?
+#### Is `-` a positional?
 - Yes.
 - A bare `-` is treated as & returned in `positionals`
 
-##### Is `-bar` the same as `--bar`?
+#### Is `-bar` the same as `--bar`?
 - No.
 - `-bar` will be parsed as short options, expanding to `-b`, `-a`, `-r` (ref. [Utility Syntax Guidelines in POSIX.1-2017](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap12.html))
 
-##### Is `---foo` the same as `--foo`?
+#### Is `---foo` the same as `--foo`?
 - No.
 - `---foo` returns `{ args: '-foo': true }`
 - `--foo` returns `{ args: { 'foo': true }`
 
-##### Is `foo=bar` a positional?
+#### Is `foo=bar` a positional?
 - Yes.
 
 ### Notes
