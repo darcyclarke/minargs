@@ -10,55 +10,52 @@ const usage = {
   },
   multiple: {
     multiple: true,
-    alias: 'm',
+    short: 'm',
     usage: 'minargs --multiple <option>',
     description: 'Define an argument that should support multiples'
   },
   alias: {
     multiple: true,
-    alias: 'a',
+    short: 'a',
     usage: 'minargs --alias <alias>:<option>',
     description: 'Define an alias between two option names'
   },
   known: {
     multiple: true,
-    alias: 'k',
+    short: 'k',
     usage: 'minargs --known <option>',
     description: 'Define an option that is expected'
   },
   strict: {
-    alias: 's',
+    short: 's',
     usage: 'minargs --known <option> --strict',
     description: 'Default: false - Define whether unknown options should error (use alongside `--known`)'
   },
   positionalValues: {
-    alias: 'p',
+    short: 'p',
     usage: 'minargs --positionalValues',
     description: 'Default: false - Define whether to capture positional values'
   },
   help: {
-    alias: 'h',
+    short: 'h',
     usage: 'minargs --help',
-    description: 'Display usage information'
+    description: 'Print usage information'
   }
 }
 const opts = {
+  positionalValues: true,
   known: Object.keys(usage),
   multiple: Object.keys(usage).filter(arg => usage[arg].multiple),
-  alias: Object.keys(usage).filter(arg => usage[arg].alias).reduce((o, k) => {
-    o[k] = usage[k].alias
+  alias: Object.keys(usage).filter(arg => usage[arg].short).reduce((o, k) => {
+    o[usage[k].short] = k
     return o
   }, {})
 }
 
-const { args, values, positionals } = minargs(opts)
-
-const options = {
-  strict: !!args.strict,
-  positionalValues: true
-}
+const { args, values } = minargs(process.argv.slice(mainArgs()), opts)
 
 function printUsage() {
+  console.log('')
   console.log('Usage:')
   console.log('')
   console.log('  minargs --args="<arguments to be parsed>" [<options>]')
@@ -71,11 +68,11 @@ function printUsage() {
   console.log.apply(this, fill(columns, ['Options:', 'Usage:', 'Description:']))
   console.log('')
   Object.keys(usage).map(name => {
-    let alias = usage[name].alias ? `-${usage[name].alias}, ` : ''
-    let row = [`  ${alias}--${name}`, usage[name].usage, usage[name].description]
+    let short = usage[name].short ? `-${usage[name].short}, ` : ''
+    let row = [`  ${short}--${name}`, usage[name].usage, usage[name].description]
     console.log.apply(this, fill(columns, row))
   })
-  return
+  console.log('')
 }
 
 function fill (columns, row) {
@@ -86,9 +83,20 @@ function fill (columns, row) {
   })
 }
 
-function run (argv = process.argv) {
+function run (argv) {
   try {
-    console.log(JSON.stringify(minargs(argv, options), null, 2))
+    const opts = {
+      strict: !!args.strict,
+      positionalValues: !!args.positionalValues,
+      known: !values.known ? [] : values.known,
+      multiple: !values.multiple ? [] : values.multiple,
+      alias: !values.alias ? [] : values.alias.reduce((o, v) => {
+          const parts = v.split(':')
+          o[parts[0]] = parts[1]
+          return o
+        }, {})
+    }
+    console.log(JSON.stringify(minargs(argv, opts), null, 2))
     process.exit(0)
   } catch (e) {
     console.error(e)
@@ -125,10 +133,18 @@ function parseString (str) {
 }
 
 if (isTTY) {
-  console.error('Usage error: no args passed')
-  console.log('')
-  printUsage()
-  process.exit(1)
+
+  if (args.help) {
+    printUsage()
+    process.exit(0)
+  } else if (!args.args) {
+    console.error('Usage error: no args passed')
+    console.log('')
+    printUsage()
+    process.exit(1)
+  } else if (args.args) {
+    run(parseString(values.args))
+  }
 
 // run as stdin, if that's what's happening...
 } else {
