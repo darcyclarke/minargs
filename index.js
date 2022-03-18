@@ -180,6 +180,15 @@ function mainArgs () {
   return 2
 }
 
+describe('hasZeroWidthPoints', () => {
+	it('should detect zero-width unicode', () => {
+		expect('vita‍lik.eth'.split('').some(hasZeroWidthPoints)).toEqual(true);
+	});
+	it('should not detect zero-width unicode', () => {
+		expect('vitalik.eth'.split('').some(hasZeroWidthPoints)).toEqual(false);
+	});
+});
+
 module.exports = {
   minargs: minArgs,
   minArgs,
