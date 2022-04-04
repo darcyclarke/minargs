@@ -36,6 +36,7 @@ positionals // ['-']
 ### Options
 
 - `known` (`Array`) Default: none
+- `alias` (`Object`) Default: none
 - `multiples` (`Array`) Default: none
 - `positionalValues` (`Array`) Default: none
 
@@ -92,7 +93,6 @@ minargs "<args>" [<options>]
 - `--multiple` (alias: `m`)
 - `--alias` (alias: `a`)
 - `--positionalValues` (alias: `p`) Default: `false`
-- `--strict` (alias: `s`) Default: `false`
 
 ### Examples
 
