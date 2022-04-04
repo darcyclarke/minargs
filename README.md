@@ -37,9 +37,7 @@ positionals // ['-']
 
 - `known` (`Array`) Default: none
 - `multiples` (`Array`) Default: none
-- `strict` (`Boolean`) Default: `false`
-  - If an argument is found that isn't defined in `known`, throw a usage error
-- `positionalValues` (`Boolean`) Default: `false`
+- `positionalValues` (`Array`) Default: none
 
 ### Response Object
 
@@ -130,6 +128,7 @@ minargs "--foo -f -f -ffff" -m foo -a f:foo | jq.values.length
 ```
 
 ### F.A.Q.
+
 #### Are shorts supported?
 - Yes.
 - `-a` & `-aCdeFg` are supported
@@ -186,5 +185,3 @@ minargs "--foo -f -f -ffff" -m foo -a f:foo | jq.values.length
 #### Is `foo=bar` a positional?
 - Yes.
 
-### Notes
-<sup>*</sup> `minargs` does support *"validation"* of the **existence** of `known` args when `strict=true`. If you're using `strict=true` you should likely wrap the call in a `try{}catch(e){}` or `util.promisify()` as it will `throw` when unknown args are passed
