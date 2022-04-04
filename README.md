@@ -1,9 +1,17 @@
 # minargs
 
+`minargs` is meant to be a primitive library which expands the current `process.argv` information for developers that want to quickly write CLI tools with minimal configuration, assumptions & dependencies. Argument parsing can take many shapes but the explicit goals of this library are as follows:
+
 ### Goals
-- **no validation<sup><small>*</small></sup>** (aka. *"bring your own validation"* ™️)
-- **minimal** configuration
+- **no** usage
+- **no** validation
+- **no** types or type cohersion
+- **no** regular expressions
+- **no** strictness
+- **no** dependencies
 - **minimal** assumptions
+- **minimal** configuration
+- **maximal** value
 
 ## Package
 
