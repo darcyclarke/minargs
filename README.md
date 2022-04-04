@@ -129,6 +129,9 @@ minargs "--foo -f -f -ffff" -m foo -a f:foo | jq.values.length
 
 ### F.A.Q.
 
+#### Why isn't strictness supported?
+- Strictness is a function of usage. By default, `minargs` does not assume that any `known` or "unknown" arguments should or shouldn't be allowed. Usage examples above show how you can quickly & easily utilize `minargs` as the backbone for an application which _does_ enforce strictness.
+
 #### Are shorts supported?
 - Yes.
 - `-a` & `-aCdeFg` are supported
