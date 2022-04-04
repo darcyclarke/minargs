@@ -12,7 +12,6 @@
 - **minimal** assumptions
 - **minimal** configuration
 - **minimal** information loss
-- **maximal** value
 
 ## Package
 
