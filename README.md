@@ -11,6 +11,7 @@
 - **no** dependencies
 - **minimal** assumptions
 - **minimal** configuration
+- **minimal** information loss
 - **maximal** value
 
 ## Package
