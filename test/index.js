@@ -20,15 +20,6 @@ t.test('minArgs : fail silently & return blank result when bad argument', t => {
   t.same(minArgs('argv'), result)
 })
 
-t.test('minArgs : throws usage error when passed a bad argument in \'strict\' mode', t => {
-  t.plan(1)
-  options = {
-    strict: true
-  }
-  let expected = new Error('usage error: argv must be an array')
-  t.throws(function () { minArgs('argv', options) }, expected)
-})
-
 t.test('minArgs : defaults to process.argv when no array passed', t => {
   t.plan(1)
   t.same(minArgs(), result)
@@ -104,16 +95,6 @@ t.test('minArgs : support known arguments', t => {
   result.values.foo = ''
   result.values.bar = ''
   t.same(minArgs(['--foo'], options), result)
-})
-
-t.test('minArgs : throw when in strict mode & unknown arguments passed', t => {
-  t.plan(1)
-  options = {
-    known: ['foo'],
-    strict: true
-  }
-  let expected = new Error('unknown option: bar')
-  t.throws(function () { minArgs(['--foo', '--bar'], options) }, expected)
 })
 
 t.test('minArgs : support bare \'-\' as a positional', t => {

@@ -20,7 +20,6 @@ function minArgs (argv, options = {}) {
     known: [],
     multiple: [],
     alias: {},
-    strict: false,
     positionalValues: false
   }
   options = Object.assign(defaults, options)
@@ -29,11 +28,6 @@ function minArgs (argv, options = {}) {
   const start = mainArgs()
   argv = typeof argv !== 'undefined' ? argv : process.argv.slice(start)
   result.process = process.argv.slice(0, start)
-
-  // throw if in strict mode & passed argv was invalid input
-  if (options.strict && !Array.isArray(argv)) {
-    throw new Error('usage error: argv must be an array')
-  }
 
   // return early an empty result if passed value isn't an array
   if (!Array.isArray(argv)) {
@@ -44,11 +38,6 @@ function minArgs (argv, options = {}) {
   function store (name, value) {
     // check for alias
     name = options.alias[name] || name
-
-    // check if errors should be thrown
-    if (options.strict && !options.known.includes(name)) {
-      throw new Error(`unknown option: ${name}`)
-    }
 
     // set existence of arg
     result.args[name] = true
@@ -101,13 +90,13 @@ function minArgs (argv, options = {}) {
           const parts = arg.split('=')
           // expand & set short existence
           const shorts = parts[0].split('')
-          shorts.slice(0, -1).map(name => store(name, ''))
+          shorts.slice(0, -1).map(short => store(short, ''))
           arg = shorts[shorts.length - 1] + '=' + parts[1]
 
         // set arg to last short for usage by positional values
         } else {
           const shorts = arg.split('')
-          shorts.slice(0, -1).map(name => store(name, ''))
+          shorts.slice(0, -1).map(short => store(short, ''))
           arg = shorts[shorts.length - 1]
         }
       } else {

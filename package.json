@@ -1,14 +1,11 @@
 {
   "name": "minargs",
   "version": "0.0.3",
-  "description": "",
+  "description": "minimum viable argument parser",
   "main": "index.js",
   "scripts": {
     "test": "tap",
     "lint": "eslint"
-  },
-  "bin": {
-    "minargs": "bin/cli.js"
   },
   "author": {
     "name": "Darcy Clarke",
