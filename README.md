@@ -1,9 +1,17 @@
 # minargs
 
+`minargs` is meant to be a primitive library which expands the current `process.argv` information for developers that want to quickly write CLI tools with minimal configuration, assumptions & dependencies. Argument parsing can take many shapes but the explicit goals of this library are as follows:
+
 ### Goals
-- **no validation<sup><small>*</small></sup>** (aka. *"bring your own validation"* ™️)
-- **minimal** configuration
+- **no** usage
+- **no** validation
+- **no** types or type cohersion
+- **no** regular expressions
+- **no** strictness
+- **no** dependencies
 - **minimal** assumptions
+- **minimal** configuration
+- **minimal** information loss
 
 ## Package
 
@@ -28,10 +36,9 @@ positionals // ['-']
 ### Options
 
 - `known` (`Array`) Default: none
+- `alias` (`Object`) Default: none
 - `multiples` (`Array`) Default: none
-- `strict` (`Boolean`) Default: `false`
-  - If an argument is found that isn't defined in `known`, throw a usage error
-- `positionalValues` (`Boolean`) Default: `false`
+- `positionalValues` (`Array`) Default: none
 
 ### Response Object
 
@@ -86,7 +93,6 @@ minargs "<args>" [<options>]
 - `--multiple` (alias: `m`)
 - `--alias` (alias: `a`)
 - `--positionalValues` (alias: `p`) Default: `false`
-- `--strict` (alias: `s`) Default: `false`
 
 ### Examples
 
@@ -122,6 +128,10 @@ minargs "--foo -f -f -ffff" -m foo -a f:foo | jq.values.length
 ```
 
 ### F.A.Q.
+
+#### Why isn't strictness supported?
+- Strictness is a function of usage. By default, `minargs` does not assume that any `known` or "unknown" arguments should or shouldn't be allowed. Usage examples above show how you can quickly & easily utilize `minargs` as the backbone for an application which _does_ enforce strictness.
+
 #### Are shorts supported?
 - Yes.
 - `-a` & `-aCdeFg` are supported
@@ -178,5 +188,3 @@ minargs "--foo -f -f -ffff" -m foo -a f:foo | jq.values.length
 #### Is `foo=bar` a positional?
 - Yes.
 
-### Notes
-<sup>*</sup> `minargs` does support *"validation"* of the **existence** of `known` args when `strict=true`. If you're using `strict=true` you should likely wrap the call in a `try{}catch(e){}` or `util.promisify()` as it will `throw` when unknown args are passed
