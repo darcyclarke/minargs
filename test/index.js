@@ -25,6 +25,26 @@ t.test('minArgs : defaults to process.argv when no array passed', t => {
   t.same(minArgs(), result)
 })
 
+t.test('minArgs : handles empty string', t => {
+  t.plan(1)
+  t.same(minArgs(''), result)
+})
+
+t.test('minArgs : handles null', t => {
+  t.plan(1)
+  t.same(minArgs(null), result)
+})
+
+t.test('minArgs : handles empty array', t => {
+  t.plan(1)
+  t.same(minArgs([]), result)
+})
+
+t.test('minArgs : handles empty object', t => {
+  t.plan(1)
+  t.same(minArgs({}), result)
+})
+
 t.test('minArgs : parses shorts', t => {
   t.plan(1)
   result.args = {

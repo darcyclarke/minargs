@@ -10,7 +10,10 @@ function minArgs (argv, options = {}) {
   }
 
   // check for options only
-  if (arguments.length === 1 && !Array.isArray(argv)) {
+  if (arguments.length === 1 &&
+      typeof argv === 'object' &&
+      !Array.isArray(argv) &&
+      argv !== null) {
     options = argv
     argv = null
   }
@@ -26,10 +29,10 @@ function minArgs (argv, options = {}) {
 
   // default to process.argv
   const start = mainArgs()
-  argv = typeof argv !== 'undefined' ? argv : process.argv.slice(start)
+  argv = argv ? argv : process.argv.slice(start)
   result.process = process.argv.slice(0, start)
 
-  // return early an empty result if passed value isn't an array
+  // return early an empty result if passed value wasn't an array
   if (!Array.isArray(argv)) {
     return result
   }
