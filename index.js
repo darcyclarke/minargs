@@ -107,7 +107,7 @@ function minArgs (argv, options = {}) {
         arg = arg.slice(2)
       }
 
-      // Handel equal values (ie. '--foo=b')
+      // Handle equal values (ie. '--foo=b')
       if (arg.includes('=')) {
         const parts = arg.split('=')
         store(parts[0], parts[1])
