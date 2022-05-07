@@ -33,16 +33,18 @@ npm install minargs
 
 - `known` (`Array`)
   - Default: none
-  - ...
+  - Define _expected_ arguments which will be returned in `args` & `values` objects whether or not they were found
 - `aliases` (`Object`)
   - Default: none
-  - ...
+  - Define shorts & aliases to map to a canonical argument
+  - Note: only single character aliases can be parsed as "shorts" (read more in the **F.A.Q.** below)
 - `multiples` (`Array`)
   - Default: none
-  - ...
-- `positionalValues` (`Array`)
-  - Default: none
-  - ...
+  - Define arguments that can be defined multiple times & stack their returned `value` as an `Array`
+  - Note: if not set, the default behaivor will use the last definition for `value`
+- `positionalValues` (`Boolean`)
+  - Default: `false`
+  - Define whether or not to use positionals that follow flags as values
 
 ### Returned Values
 
@@ -57,10 +59,11 @@ npm install minargs
 ```
 
 #### `args`
+- An `Object` of canonical arguments with `Boolean` values representing "existence"
 
 #### `values`
-- Returned values are a string by default
-- Returned values are an array of strings if the corresponding arg was defined in `multiples`
+- An `Object` of canonical arguments with parsed `String` values
+- Returned values will be an `Array` of `String`s if the corresponding argument supported `multiples`
 - **Examples:**
   - `--foo=bar` will return `undefined` with no configuration
   - `--foo=bar` will return `"bar"` when `'foo'`
@@ -68,17 +71,18 @@ npm install minargs
     - Notably, `bar` is treated as a positional & returned in `positionals` if `positionalValues` is `false`
 
 #### `positionals`
+- An `Array` of positional parsed positional `String` values
 
 #### `remainder`
-- Returned value is the remaining array of results from `process.argv` after the first bare `--`
-- Notably, this is useful for recursively parsing arguments or passing along args to other processes
+- An `Array` of `String` values the follow the first bare `--`
+- Notably, this is useful for recursively parsing arguments or passing along args to other processes (read more in the **F.A.Q.** below)
 
 #### `process`
-- Returned value is an array associated with `process` args split from `process.argv` at the beginning of parsing if the default `process.argv` is being parsed
+- Returned value is an `Array` associated with `process` arguments split from `process.argv` at the beginning of parsing if the default `process.argv` is being used
   - Notably, `mainArgs()` is used to determine these values
 - Returned value will be an empty array if an explicit array to parse was passed to `minargs()`
 
-### Examples Usage
+### Example Usage
 
 #### Basic
 
@@ -102,6 +106,9 @@ process       // [ "/path/to/node", "/path/to/program/cli.js" ]
 
 #### Handling existence
 
+<details>
+<summary>Toggle Example</summary>
+
 ```bash
 $ exists.js --foo
 ```
@@ -116,8 +123,12 @@ if (args.foo) {
   // ...
 }
 ```
+</details>
 
 #### Handling unknown args
+
+<details>
+<summary>Toggle Example</summary>
 
 ```bash
 $ unknown.js --baz
@@ -139,8 +150,12 @@ if (unknown.length > 0) {
 
 // ...
 ```
+</details>
 
 #### Handling validation
+
+<details>
+<summary>Toggle Example</summary>
 
 ```bash
 $ validate.js --num=1337
@@ -177,8 +192,12 @@ Object.keys(args).filter(name => args[name]).map(name => {
 
 // ...
 ```
+</details>
 
 #### Handling recursive parsing
+
+<details>
+<summary>Toggle Example</summary>
 
 ```bash
 $ recursive-parse.js
@@ -218,8 +237,12 @@ minargsRecursiveSyncFlat(process.argv) // flattened results object
 
 // ...
 ```
+</details>
 
 #### Handling sub process
+
+<details>
+<summary>Toggle Example</summary>
 
 ```bash
 $ mkdir.js ./path/to/new/dir/ --force --verbose --parents
@@ -236,9 +259,12 @@ const cmd = (flags.force) ? 'sudo mkdir' : 'mkdir'
 
 process('child_process').spawnSync(cmd, [...args, ...positionals])
 ```
-
+</details>
 
 #### Handling robust options & usage
+
+<details>
+<summary>Toggle Example</summary>
 
 ```bash
 $ usage.js -h
@@ -281,6 +307,7 @@ if (args.help) {
 
 /// ...
 ```
+</details>
 
 ### F.A.Q.
 
