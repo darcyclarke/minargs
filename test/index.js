@@ -161,7 +161,7 @@ t.test('minArgs : parses array when passed', t => {
 t.test('minArgs : supports shorts aliasing to long-form', t => {
   t.plan(1)
   options = {
-    alias: {
+    aliases: {
       f: 'foo'
     }
   }
@@ -173,7 +173,7 @@ t.test('minArgs : supports shorts aliasing to long-form', t => {
 t.test('minArgs : supports aliasing', t => {
   t.plan(1)
   options = {
-    alias: {
+    aliases: {
       f: 'foo'
     }
   }

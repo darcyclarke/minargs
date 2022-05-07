@@ -22,7 +22,7 @@ function minArgs (argv, options = {}) {
   const defaults = {
     known: [],
     multiple: [],
-    alias: {},
+    aliases: {},
     positionalValues: false
   }
   options = Object.assign(defaults, options)
@@ -39,8 +39,8 @@ function minArgs (argv, options = {}) {
 
   // set arg, value
   function store (name, value) {
-    // check for alias
-    name = options.alias[name] || name
+    // check for aliases
+    name = options.aliases[name] || name
 
     // set existence of arg
     result.args[name] = true
