@@ -9,7 +9,7 @@
 - **no** regular expressions
 - **no** strictness
 - **no** dependencies
-- **no** vulnerabilities
+- **no** information loss
 - **minimal** assumptions
 - **minimal** configuration
 - **100%** test coverage
@@ -29,19 +29,13 @@ npm install minargs
 - `argv` (`Array`)
   - Default: `process.argv`
   - The argument strings to parse
+
 #### Options
 
-- `known` (`Array`)
-  - Default: none
-  - Define _expected_ arguments which will be returned in `args` & `values` objects whether or not they were found
-- `aliases` (`Object`)
+- `alias` (`Object`)
   - Default: none
   - Define shorts & aliases to map to a canonical argument
   - Note: only single character aliases can be parsed as "shorts" (read more in the **F.A.Q.** below)
-- `multiples` (`Array`)
-  - Default: none
-  - Define arguments that can be defined multiple times & stack their returned `value` as an `Array`
-  - Note: if not set, the default behaivor will use the last definition for `value`
 - `positionalValues` (`Boolean`)
   - Default: `false`
   - Define whether or not to use positionals that follow flags as values
@@ -51,23 +45,17 @@ npm install minargs
 ```js
 {
   args: {},
-  values: {},
   positionals: [],
   remainder: [],
-  process: []
+  argv: []
 }
 ```
 
 #### `args`
-- An `Object` of canonical arguments with `Boolean` values representing "existence"
-
-#### `values`
-- An `Object` of canonical arguments with parsed `String` values
-- Returned values will be an `Array` of `String`s if the corresponding argument supported `multiples`
+- An `Object` of canonical argument keys with corresponding `Array` of parsed `String` values
 - **Examples:**
-  - `--foo=bar` will return `undefined` with no configuration
-  - `--foo=bar` will return `"bar"` when `'foo'`
-  - `--foo bar` will return `"bar"` when `'foo'` & `positionalValues` is `true`
+  - `--foo=bar` will return `["bar"]`
+  - `--foo bar` will return `["bar"]` when `positionalValues` is `true`
     - Notably, `bar` is treated as a positional & returned in `positionals` if `positionalValues` is `false`
 
 #### `positionals`
@@ -76,11 +64,6 @@ npm install minargs
 #### `remainder`
 - An `Array` of `String` values the follow the first bare `--`
 - Notably, this is useful for recursively parsing arguments or passing along args to other processes (read more in the **F.A.Q.** below)
-
-#### `process`
-- Returned value is an `Array` associated with `process` arguments split from `process.argv` at the beginning of parsing if the default `process.argv` is being used
-  - Notably, `mainArgs()` is used to determine these values
-- Returned value will be an empty array if an explicit array to parse was passed to `minargs()`
 
 ### Example Usage
 
@@ -95,13 +78,12 @@ $ basic.js - --foo=bar -- --baz
 
 // basic.js
 const { minargs } = require('minargs')
-const { args, values, positionals, remainder, process } = minargs()
+const { args, positionals, remainder, argv } = minargs()
 
-args          // { "foo": true }
-values        // { "foo": "bar" }
+args          // { "foo": ["bar"] }
 positionals   // ["-"]
 remainder     // ["--baz"]
-process       // [ "/path/to/node", "/path/to/program/cli.js" ]
+argv          // [ { index: 0, type: 'argument', value: '{ ... }' }, ... ]
 ```
 
 #### Handling existence
@@ -111,6 +93,27 @@ process       // [ "/path/to/node", "/path/to/program/cli.js" ]
 
 ```bash
 $ exists.js --foo
+```
+
+```js
+#!/usr/bin/env node
+
+// exists.js
+const { minargs } = require('minargs')
+const { args } = minargs()
+if (args.foo) {
+  // ...
+}
+```
+</details>
+
+#### Handling last value define
+
+<details>
+<summary>Toggle Example</summary>
+
+```bash
+$ last-definition-.js --foo
 ```
 
 ```js
@@ -166,7 +169,7 @@ $ validate.js --num=1337
 
 // validate.js
 const { minargs } = require('minargs')
-const { args, values } = minargs()
+const { args } = minargs()
 const usage = {
   num: {
     validate: (value) => {
@@ -187,7 +190,7 @@ const usage = {
 }
 
 Object.keys(args).filter(name => args[name]).map(name => {
-  usage[name].validate(values[name])
+  usage[name].validate(args[name].pop())
 })
 
 // ...
@@ -223,9 +226,8 @@ minargsRecursiveSyncArray(process.argv) // array of results
 
 function minargsRecursiveSyncFlat(argv, obj) {
   const result = minargs(argv)
-  obj = obj || { args: {}, values: {}, positionals: [] }
+  obj = obj || { args: {}, positionals: [] }
   obj.args = { ...obj.args, ...result.args }
-  obj.values = { ...obj.values, ...result.values }
   obj.positionals = obj.positionals.concat(result.positionals)
   if (result.remainder.length > 0) {
     minargsRecursiveSyncFlat(result.remainder, obj)
@@ -252,12 +254,12 @@ $ mkdir.js ./path/to/new/dir/ --force --verbose --parents
 #!/usr/bin/env node
 
 // mkdir.js
-const knownOpts = ['force']
-const { flags, positionals } = parseArgs({ withValue: knownOpts })
-const args = Object.keys(flags).filter(f => knownOpts[f])
-const cmd = (flags.force) ? 'sudo mkdir' : 'mkdir'
+const known = ['force']
+const { args, positionals } = minargs()
+const cmd = (args.force) ? 'sudo mkdir' : 'mkdir'
+const _args = Object.keys(flags).filter(f => known[f])
 
-process('child_process').spawnSync(cmd, [...args, ...positionals])
+process('child_process').spawnSync(cmd, [..._args, ...positionals])
 ```
 </details>
 
@@ -288,8 +290,6 @@ const usage = {
   }
 }
 const opts = {
-  known: Object.keys(usage),
-  multiple: Object.keys(usage).filter(arg => usage[arg].multiple),
   alias: Object.keys(usage).filter(arg => usage[arg].short).reduce((o, k) => {
     o[usage[k].short] = k
     return o
@@ -312,7 +312,7 @@ if (args.help) {
 ### F.A.Q.
 
 #### Why isn't strictness supported?
-  * Strictness is a function of usage. By default, `minargs` does not assume that any `known` or "unknown" arguments should or shouldn't be allowed. Usage examples above show how you can quickly & easily utilize `minargs` as the backbone for an application which _does_ enforce strictness though.
+  * Strictness is a function of usage. By default, `minargs` does not assume anything about "known" or "unknown" arguments or their intended values. Usage examples above show how you can quickly & easily utilize `minargs` as the backbone for an application which _does_ enforce strictness, validation & more.
 
 #### Are shorts supported?
   * Yes.
@@ -368,8 +368,9 @@ if (args.help) {
 
 #### Are negative numbers supported as positional values?
   * No.
+  * `minargs` aligns with the [POSIX Argument Syntax](https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html) here (ie. "Arguments are options if they begin with a hyphen delimiter")
   * `--number -2` will be parsed as `{ args: { 'number': true, '2': true } }`
-  * You will have to use explicit value setting to make this association (ex. `--number=-2`)
+  * You will have to use explicit value setting to make this association (ex. `--number=-2`) & may further require validation/type coercion to determine if the value is a `Number` (as is shown in the usage examples above)
 
 ### CLI
 

@@ -4,6 +4,9 @@
   "description": "minimum viable argument parser",
   "main": "index.js",
   "scripts": {
+    "preversion": "npm run lt",
+    "prepublish": "npm run lt",
+    "lt": "npm run lint && npm test",
     "test": "tap",
     "lint": "eslint"
   },

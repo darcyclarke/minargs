@@ -4,102 +4,118 @@ function minArgs (argv, options = {}) {
   // setup result object definitions
   let result = {
     args: {},
-    values: {},
     positionals: [],
-    remainder: []
+    remainder: [],
+    argv: []
+  }
+  let defaulted = false
+
+  // set positional, arg & values
+  function store (index, type, name, value) {
+    // check the type of item being stored
+    if (type === 'argument' || type === 'short') {
+      // check for aliases
+      let alias = options.alias[name] || name
+
+      // check if we should store values
+      value = (typeof value !== 'undefined') ? value : ''
+
+      // push if set already
+      if (result.args[alias]) {
+        result.args[alias].push(value)
+      } else {
+        result.args[alias] = [value]
+      }
+    }
+
+    // set item in the index
+    result.argv.push({
+      index,
+      type,
+      value: name ? { name, value } : value
+    })
   }
 
   // check for options only
   if (arguments.length === 1 &&
-      typeof argv === 'object' &&
-      !Array.isArray(argv) &&
-      argv !== null) {
-    options = argv
-    argv = null
+      typeof arguments[0] === 'object' &&
+      !Array.isArray(arguments[0]) &&
+      argv != null) {
+    options = arguments[0]
+    argv = process.argv
+    defaulted = true
   }
 
-  // set option defaults
-  const defaults = {
-    known: [],
-    multiple: [],
-    aliases: {},
-    positionalValues: false
+  // fallback to process.argv if not set
+  if (arguments.length === 0) {
+    argv = process.argv
+    defaulted = true
   }
-  options = Object.assign(defaults, options)
 
-  // default to process.argv
-  const start = mainArgs()
-  argv = argv ? argv : process.argv.slice(start)
-  result.process = process.argv.slice(0, start)
-
-  // return early an empty result if passed value wasn't an array
+  // return early if argv isn't an array
   if (!Array.isArray(argv)) {
     return result
   }
 
-  // set arg, value
-  function store (name, value) {
-    // check for aliases
-    name = options.aliases[name] || name
+  // set option defaults
+  const defaults = {
+    alias: {},
+    recursive: false,
+    positionalValues: false
+  }
+  options = Object.assign(defaults, options)
 
-    // set existence of arg
-    result.args[name] = true
+  // set starting position
+  let start = 0
 
-    // check if we should store values
-    value = (typeof value !== 'undefined') ? value : ''
-
-    // push if set already & multiple
-    if (result.values[name] && options.multiple.includes(name)) {
-      result.values[name].push(value)
-    // create array value if doesn't exist
-    } else if (options.multiple.includes(name)) {
-      result.values[name] = [value]
-    // fallback to singular value
-    } else {
-      result.values[name] = value
-    }
+  // set process positionals & update start position when defaulting
+  if (defaulted) {
+    start = mainArgs()
+    process.argv.slice(0, start).map((v, i) => store(i, 'process', null, v))
   }
 
-  // set known args initial existence
-  options.known.map(name => {
-    result.args[name] = false
-    result.values[name] = ''
-  })
-
   // walk args
-  let pos = 0
-  while (pos < argv.length) {
-    let arg = argv[pos]
+  let index = start
+  while (index < argv.length) {
+    let type = ''
+    let arg = argv[index]
 
     // Handle args
     if (arg.startsWith('-')) {
       // Handle stdin/stdout '-' positional
       if (arg === '-') {
-        result.positionals.push('-')
-        ++pos
+        result.positionals.push(arg)
+        store(index, 'positional', null, arg)
+        ++index
         continue
 
       // Handle end of input (ie. bare '--')
       } else if (arg === '--') {
-        result.remainder = argv.slice(++pos)
+        store(index, 'positional', null, arg)
+        if (options.recursive) {
+          result.positionals.push(arg)
+          ++index
+          continue
+        }
+        result.remainder = argv.slice(++index)
         return result
 
       // Handle shorts (ie. '-x')
       } else if (arg.charAt(1) !== '-') {
         arg = arg.slice(1, arg.length)
-
+        type = 'short'
         // Handle short value setting
         if (arg.includes('=')) {
           const parts = arg.split('=')
           // expand & set short existence
           const shorts = parts[0].split('')
-          shorts.slice(0, -1).map(short => store(short, ''))
+          shorts.slice(0, -1).map(short => store(index, type, short, ''))
           arg = shorts[shorts.length - 1] + '=' + parts[1]
 
         // set arg to last short for usage by positional values
         } else {
           const shorts = arg.split('')
-          shorts.slice(0, -1).map(short => store(short, ''))
+          shorts.slice(0, -1).map(short => store(index, type, short, ''))
           arg = shorts[shorts.length - 1]
         }
       } else {
@@ -110,24 +126,30 @@ function minArgs (argv, options = {}) {
       // Handle equal values (ie. '--foo=b')
       if (arg.includes('=')) {
         const parts = arg.split('=')
-        store(parts[0], parts[1])
+        store(index, type || 'argument', parts[0], parts[1])
 
       // Handle positional values (ie. '--foo b')
-      } else if (pos + 1 < argv.length &&
-                !argv[pos + 1].startsWith('-') &&
+      } else if (index + 1 < argv.length &&
+                !argv[index + 1].startsWith('-') &&
                 options.positionalValues) {
-        store(arg, argv[++pos])
+        store(index, type || 'argument', arg, argv[++index])
+        result.argv.push({
+          index,
+          type: 'value',
+          value: argv[index]
+        })
       } else {
-        store(arg)
+        store(index, type || 'argument', arg)
       }
 
     // Arguments without a dash prefix are considered "positional"
     } else {
       result.positionals.push(arg)
+      store(index, 'positional', null, arg)
     }
 
     // increment position
-    pos++
+    index++
   }
 
   // return result

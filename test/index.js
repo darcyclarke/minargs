@@ -1,5 +1,5 @@
 const t = require('tap')
-const { minArgs, mainArgs } = require('../index.js')
+const { minargs, mainArgs } = require('../index.js')
 const _process = process
 let result, options
 
@@ -8,178 +8,206 @@ t.beforeEach(t => {
   options = {}
   result = {
     args: {},
-    values: {},
     positionals: [],
     remainder: [],
-    process: process.argv.slice(0, mainArgs())
+    argv: []
   }
+  process.argv.slice(0, mainArgs()).map((v, i) => result.argv.push({ index: i, type: 'process', value: v }))
 })
 
-t.test('minArgs : fail silently & return blank result when bad argument', t => {
+t.test('minargs : defaults to process.argv when no array passed', t => {
   t.plan(1)
-  t.same(minArgs('argv'), result)
+  t.same(minargs(), result)
 })
 
-t.test('minArgs : defaults to process.argv when no array passed', t => {
+t.test('minargs : fail silently & return blank result when bad argument', t => {
   t.plan(1)
-  t.same(minArgs(), result)
+  result.argv = []
+  t.same(minargs('argv'), result)
 })
 
-t.test('minArgs : handles empty string', t => {
+t.test('minargs : handles empty string', t => {
   t.plan(1)
-  t.same(minArgs(''), result)
+  result.argv = []
+  t.same(minargs(''), result)
 })
 
-t.test('minArgs : handles null', t => {
+t.test('minargs : handles null', t => {
   t.plan(1)
-  t.same(minArgs(null), result)
+  result.argv = []
+  t.same(minargs(null), result)
 })
 
-t.test('minArgs : handles empty array', t => {
+t.test('minargs : handles empty array', t => {
   t.plan(1)
-  t.same(minArgs([]), result)
+  result.argv = []
+  t.same(minargs([]), result)
 })
 
-t.test('minArgs : handles empty object', t => {
+t.test('minargs : handles empty object', t => {
   t.plan(1)
-  t.same(minArgs({}), result)
+  t.same(minargs({}), result)
 })
 
-t.test('minArgs : parses shorts', t => {
+t.test('minargs : parses shorts', t => {
   t.plan(1)
   result.args = {
-    f: true,
-    o: true
+    f: [''],
+    o: ['', '']
   }
-  result.values = {
-    f: '',
-    o: ''
-  }
-  t.same(minArgs(['-foo']), result)
+  result.argv = [
+    { index: 0, type: 'short', value: { name: 'f', value: '' } },
+    { index: 0, type: 'short', value: { name: 'o', value: '' } },
+    { index: 0, type: 'short', value: { name: 'o', value: '' } }
+  ]
+  t.same(minargs(['-foo']), result)
 })
 
-t.test('minArgs : parses & stores values by default', t => {
+t.test('minargs : parses & stores values by default', t => {
   t.plan(1)
-  options = {
-    values: ['foo']
-  }
-  result.args.foo = true
-  result.values.foo = 'bar'
-  t.same(minArgs(['--foo=bar']), result)
+  result.args.foo = ['bar']
+  result.argv = [
+    { index: 0, type: 'argument', value: { name: 'foo', value: 'bar' } }
+  ]
+  t.same(minargs(['--foo=bar']), result)
 })
 
-t.test('minArgs : supports parsing multiple values', t => {
+t.test('minargs : supports parsing multiple values by default', t => {
   t.plan(1)
-  options = {
-    multiple: ['f', 'o']
-  }
-  result.args.f = true
-  result.args.o = true
-  result.values.f = ['']
-  result.values.o = ['', '']
-  t.same(minArgs(['-foo'], options), result)
+  result.args.foo = ['', '']
+  result.argv = [
+    { index: 0, type: 'argument', value: { name: 'foo', value: '' } },
+    { index: 1, type: 'argument', value: { name: 'foo', value: '' } }
+  ]
+  t.same(minargs(['--foo', '--foo']), result)
 })
 
-t.test('minArgs : parses & stores values when multiple shorts passed', t => {
+t.test('minargs : parses & stores value for last arg when multiple shorts', t => {
   t.plan(1)
-  options = {
-    multiple: ['f', 'o']
-  }
-  result.args.f = true
-  result.args.o = true
-  result.values.f = ['']
-  result.values.o = ['', 'bar']
-  t.same(minArgs(['-foo=bar'], options), result)
+  result.args.f = ['']
+  result.args.o = ['', 'bar']
+  result.argv = [
+    { index: 0, type: 'short', value: { name: 'f', value: '' } },
+    { index: 0, type: 'short', value: { name: 'o', value: '' } },
+    { index: 0, type: 'short', value: { name: 'o', value: 'bar' } }
+  ]
+  t.same(minargs(['-foo=bar']), result)
 })
 
-t.test('minArgs : parses & stores values when multiple shorts passed w/ positionalValue', t => {
+t.test('minargs : parses & stores values when multiple shorts passed w/ positionalValue', t => {
   t.plan(1)
   options = {
-    multiple: ['f', 'o'],
     positionalValues: true
   }
-  result.args.f = true
-  result.args.o = true
-  result.values.f = ['']
-  result.values.o = ['', 'bar']
-  t.same(minArgs(['-foo', 'bar'], options), result)
+  result.args.f = ['']
+  result.args.o = ['', 'bar']
+  result.argv = [
+    { index: 0, type: 'short', value: { name: 'f', value: '' } },
+    { index: 0, type: 'short', value: { name: 'o', value: '' } },
+    { index: 0, type: 'short', value: { name: 'o', value: 'bar' } },
+    { index: 1, type: 'value', value: 'bar' }
+  ]
+  t.same(minargs(['-foo', 'bar'], options), result)
 })
 
-t.test('minArgs : support known arguments', t => {
+t.test('minargs : support bare \'-\' as a positional', t => {
+  t.plan(1)
+  result.args.foo = ['']
+  result.positionals = ['-', 'bar']
+  result.argv = [
+    { index: 0, type: 'argument', value: { name: 'foo', value: '' } },
+    { index: 1, type: 'positional', value: '-' },
+    { index: 2, type: 'positional', value: 'bar' }
+  ]
+  t.same(minargs(['--foo', '-', 'bar']), result)
+})
+
+t.test('minargs : support bare \'--\' to mark end of parsing & return remainder', t => {
+  t.plan(1)
+  result.args.foo = ['']
+  result.remainder = ['bar']
+  result.positionals = []
+  result.argv = [
+    { index: 0, type: 'argument', value: { name: 'foo', value: '' } },
+    { index: 1, type: 'positional', value: '--' }
+  ]
+  t.same(minargs(['--foo', '--', 'bar']), result)
+})
+
+t.test('minargs : supports recursive parsing & stores \'--\' markers as positionals', t => {
   t.plan(1)
   options = {
-    known: ['foo', 'bar']
+    recursive: true
   }
-  result.args.foo = true
-  result.args.bar = false
-  result.values.foo = ''
-  result.values.bar = ''
-  t.same(minArgs(['--foo'], options), result)
+  result.args.foo = ['']
+  result.remainder = []
+  result.positionals = ['--', 'bar']
+  result.argv = [
+    { index: 0, type: 'argument', value: { name: 'foo', value: '' } },
+    { index: 1, type: 'positional', value: '--' },
+    { index: 2, type: 'positional', value: 'bar' }
+  ]
+  t.same(minargs(['--foo', '--', 'bar'], options), result)
 })
 
-t.test('minArgs : support bare \'-\' as a positional', t => {
-  t.plan(1)
-  result.args.foo = true
-  result.values.foo = ''
-  result.positionals = ['-', 'bar']
-  t.same(minArgs(['--foo', '-', 'bar']), result)
-})
-
-t.test('minArgs : support bare \'--\' to mark end of parsing & return remainder', t => {
-  t.plan(1)
-  result.args.foo = true
-  result.values.foo = ''
-  result.remainder = ['bar']
-  t.same(minArgs(['--foo', '--', 'bar']), result)
-})
-
-t.test('minArgs : parses positonals by default', t => {
+t.test('minargs : parses positonals by default', t => {
   t.plan(1)
   result.positionals = ['bar']
-  t.same(minArgs(['bar']), result)
+  result.argv = [
+    { index: 0, type: 'positional', value: 'bar' }
+  ]
+  t.same(minargs(['bar']), result)
 })
 
-t.test('minArgs : parses positonals as option values when positionalValues & values is set', t => {
+t.test('minargs : parses positonals as option values when positionalValues & values is set', t => {
   t.plan(1)
   options = {
-    values: ['foo'],
     positionalValues: true
   }
-  result.args.foo = true
-  result.values.foo = 'bar'
+  result.args.foo = ['bar']
   result.positionals = []
-  t.same(minArgs(['--foo', 'bar'], options), result)
+  result.argv = [
+    { index: 0, type: 'argument', value: { name: 'foo', value: 'bar' } },
+    { index: 1, type: 'value', value: 'bar' }
+  ]
+  t.same(minargs(['--foo', 'bar'], options), result)
 })
 
-t.test('minArgs : parses array when passed', t => {
+t.test('minargs : parses array when passed', t => {
   t.plan(1)
-  result.args.foo = true
-  result.values.foo = ''
-  t.same(minArgs(['--foo']), result)
+  result.args.foo = ['']
+  result.argv = [
+    { index: 0, type: 'argument', value: { name: 'foo', value: '' } }
+  ]
+  t.same(minargs(['--foo']), result)
 })
 
-t.test('minArgs : supports shorts aliasing to long-form', t => {
+t.test('minargs : supports shorts aliasing to long-form', t => {
   t.plan(1)
   options = {
-    aliases: {
+    alias: {
       f: 'foo'
     }
   }
-  result.args.foo = true
-  result.values.foo = ''
-  t.same(minArgs(['-f'], options), result)
+  result.args.foo = ['']
+  result.argv = [
+    { index: 0, type: 'short', value: { name: 'f', value: '' } }
+  ]
+  t.same(minargs(['-f'], options), result)
 })
 
-t.test('minArgs : supports aliasing', t => {
+t.test('minargs : supports aliasing', t => {
   t.plan(1)
   options = {
-    aliases: {
+    alias: {
       f: 'foo'
     }
   }
-  result.args.foo = true
-  result.values.foo = ''
-  t.same(minArgs(['--f'], options), result)
+  result.args.foo = ['']
+  result.argv = [
+    { index: 0, type: 'argument', value: { name: 'f', value: '' } }
+  ]
+  t.same(minargs(['--f'], options), result)
 })
 
 t.test('mainArgs : returns 1 when includes -e', t => {
