@@ -210,6 +210,19 @@ t.test('minargs : supports aliasing', t => {
   t.same(minargs(['--f'], options), result)
 })
 
+t.test('minargs : coerces non-string objects to strings', t => {
+  t.plan(1)
+  result.positionals = ['[object Object]', '', 'null', 'undefined', 'NaN']
+  result.argv = [
+    { index: 0, type: 'positional', value: '[object Object]' },
+    { index: 1, type: 'positional', value: '' },
+    { index: 2, type: 'positional', value: 'null' },
+    { index: 3, type: 'positional', value: 'undefined' },
+    { index: 4, type: 'positional', value: 'NaN' }
+  ]
+  t.same(minargs([{}, [], null, undefined, NaN], options), result)
+})
+
 t.test('mainArgs : returns 1 when includes -e', t => {
   t.plan(1)
   process.execArgv.push('-e')

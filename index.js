@@ -78,7 +78,7 @@ function minArgs (argv, options = {}) {
   let index = start
   while (index < argv.length) {
     let type = ''
-    let arg = argv[index]
+    let arg = String(argv[index])
 
     // Handle args
     if (arg.startsWith('-')) {

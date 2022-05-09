@@ -54,15 +54,16 @@ npm install minargs
 #### `args`
 - An `Object` of canonical argument keys with corresponding `Array` of parsed `String` values
 - **Examples:**
+  - `--foo` will return `[""]` (note the empty string by default)
   - `--foo=bar` will return `["bar"]`
   - `--foo bar` will return `["bar"]` when `positionalValues` is `true`
     - Notably, `bar` is treated as a positional & returned in `positionals` if `positionalValues` is `false`
 
 #### `positionals`
-- An `Array` of positional parsed positional `String` values
+- An `Array` of parsed positional `String` values
 
 #### `remainder`
-- An `Array` of `String` values the follow the first bare `--`
+- An `Array` of `String` values the follow the first bare `--` when `recursive` is `false`
 - Notably, this is useful for recursively parsing arguments or passing along args to other processes (read more in the **F.A.Q.** below)
 
 ### Example Usage
@@ -312,19 +313,20 @@ if (args.help) {
 ### F.A.Q.
 
 #### Why isn't strictness supported?
-  * Strictness is a function of usage. By default, `minargs` does not assume anything about "known" or "unknown" arguments or their intended values. Usage examples above show how you can quickly & easily utilize `minargs` as the backbone for an application which _does_ enforce strictness, validation & more.
+  * Strictness is a function of usage. By default, `minargs` does not assume anything about "known" or "unknown" arguments or their intended values (ex. defaults/types). Usage examples above show how you can quickly & easily utilize `minargs` as the backbone for an application which _does_ enforce strictness/validation & more.
 
 #### Are shorts supported?
   * Yes.
-  * `-a` & `-aCdeFg` are supported
+  * Individual (ex. `-a`) & combined (ex. `-aCdeFg`) shorts are supported
   * `-a=b` will capture & return `"b"` as a value
   * `-a b` will capture & return `"b"` as a value if  `positionalValues` is `true`
 
 #### What is an `alias`?
-  * An alias can be any other string that maps to the *canonical* option; this includes single characters which will map shorts to a long-form (ex. `alias: { f: foo }` will parse `-f` as `{ args: { 'foo': true } }`)
+  * An alias can be any other string that maps to a *canonical* option; this includes single characters which will map shorts to a long-form (ex. `alias: { f: foo }` will parse `-f` as `{ args: { "foo": [""] } }`)
 
 #### Is `cmd --foo=bar baz` the same as `cmd baz --foo=bar`?
-  * Yes.
+  * _Sort of_.
+  * The returned `argv` `Array` will change to reflect the differing positions of the arguments & positionals **BUT** `args` & `positionals` will remain consistent
 
 #### Is value validation or type cohersion supported?
   * No.
@@ -334,10 +336,11 @@ if (args.help) {
 
 #### Does `--no-foo` coerce to `--foo=false`?
   * No.
-  * It would set `{ args: { 'no-foo': true } }`
+  * `--no-foo` will parse to `{ args: { "no-foo": [""] } }` & `--foo-false` to `{ args: { "no-foo": ["false"] } }` respectively
 
 #### Is `--foo` the same as `--foo=true`?
   * No.
+  * `--foo` will parse to `{ args: { "foo": [""] } }` & `--foo=true` to ` { args: { "foo": ["true"] } }` respectively
 
 #### Are environment variables supported?
   * No.
@@ -360,8 +363,8 @@ if (args.help) {
 
 #### Is `---foo` the same as `--foo`?
   * No.
-  * `---foo` returns `{ args: '-foo': true }`
-  * `--foo` returns `{ args: { 'foo': true }`
+  * `---foo` returns `{ args: "-foo": [""] }`
+  * `--foo` returns `{ args: { "foo": [""] }`
 
 #### Is `foo=bar` a positional?
   * Yes.
@@ -369,7 +372,7 @@ if (args.help) {
 #### Are negative numbers supported as positional values?
   * No.
   * `minargs` aligns with the [POSIX Argument Syntax](https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html) here (ie. "Arguments are options if they begin with a hyphen delimiter")
-  * `--number -2` will be parsed as `{ args: { 'number': true, '2': true } }`
+  * `--number -2` will be parsed as `{ args: { "number": [""], "2": [""] } }`
   * You will have to use explicit value setting to make this association (ex. `--number=-2`) & may further require validation/type coercion to determine if the value is a `Number` (as is shown in the usage examples above)
 
 ### CLI
