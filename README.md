@@ -90,7 +90,7 @@ const { args, positionals, remainder, argv } = minargs()
 args          // { "foo": ["bar"] }
 positionals   // ["-"]
 remainder     // ["--baz"]
-argv          // [ { index: 0, type: 'argument', value: '{ ... }' }, ... ]
+argv          // [ { index: 0, type: 'argument', value: { name: "foo", value: "bar" } } ... ]
 ```
 
 #### Handling existence
