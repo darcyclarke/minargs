@@ -66,6 +66,12 @@ npm install minargs
 - An `Array` of `String` values the follow the first bare `--` when `recursive` is `false`
 - Notably, this is useful for recursively parsing arguments or passing along args to other processes (read more in the **F.A.Q.** below)
 
+#### `argv`
+- An `Array` of `Object`s with corresponding `index`s mapping back to the original `process.argv` or provided `Array`
+- `Object`s also contain the `value` parsed & `type` (ie. `"argument"`, `"short"`, `"positional"` or `"value"`)
+- The `type` `"value"` will only ever be defined -- in place of `"positional"` -- when `positionalValues=true`
+- Notably, this is useful for recreating the original `String` values or extending the capabilities of this information (ref. https://github.com/pkgjs/parseargs/issues/84)
+
 ### Example Usage
 
 #### Basic
