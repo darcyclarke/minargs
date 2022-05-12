@@ -12,6 +12,7 @@
 - **no** information loss
 - **minimal** assumptions
 - **minimal** configuration
+- **consistant** results/format
 - **100%** test coverage
 
 ### Mantras
@@ -327,6 +328,11 @@ if (args.help) {
   * Individual (ex. `-a`) & combined (ex. `-aCdeFg`) shorts are supported
   * `-a=b` will capture & return `"b"` as a value
   * `-a b` will capture & return `"b"` as a value if  `positionalValues` is `true`
+
+#### Are multiples supported?
+  * Yes.
+  * By default multiple definitions of the same argument will get consolidated into a single `arg` entry with a corresponding `Array` of `String` values
+  * Getting the last defined value of an argument is as simple as running `.pop()` on the `Array` (ex. `args.foo.pop()`)
 
 #### What is an `alias`?
   * An alias can be any other string that maps to a *canonical* option; this includes single characters which will map shorts to a long-form (ex. `alias: { f: foo }` will parse `-f` as `{ args: { "foo": [""] } }`)
