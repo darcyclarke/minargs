@@ -1,6 +1,6 @@
 {
   "name": "minargs",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "minimum viable argument parser",
   "main": "index.js",
   "scripts": {
