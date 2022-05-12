@@ -374,10 +374,10 @@ if (args.help) {
 
 ```bash
 # install package globally & call bin...
-npm install minargs -g && minargs
+npm install @minargs/cli -g && minargs
 
 # or, use `npx` to install & call bin...
-npx minargs
+npx -- @minargs/cli "<args>" [<options>]
 ```
 
 #### Usage
