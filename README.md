@@ -223,32 +223,7 @@ $ recursive-parse.js
 
 // recursive-parse.js
 const { minargs } = require('minargs')
-
-function minargsRecursiveSyncArray(argv, arr) {
-  arr = arr || []
-  const result = minargs(argv)
-  arr.push(result)
-  if (result.remainder.length > 0) {
-    minargsRecursiveSyncArray(result.remainder, arr)
-  }
-  return arr
-}
-
-minargsRecursiveSyncArray(process.argv) // array of results
-
-function minargsRecursiveSyncFlat(argv, obj) {
-  const result = minargs(argv)
-  obj = obj || { args: {}, positionals: [] }
-  obj.args = { ...obj.args, ...result.args }
-  obj.positionals = obj.positionals.concat(result.positionals)
-  if (result.remainder.length > 0) {
-    minargsRecursiveSyncFlat(result.remainder, obj)
-  }
-  return obj
-}
-
-minargsRecursiveSyncFlat(process.argv) // flattened results object
-
+console.log(minargs({ recursive: true }))
 // ...
 ```
 </details>
