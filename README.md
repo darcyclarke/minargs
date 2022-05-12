@@ -143,6 +143,7 @@ if (args.foo) {
 ```bash
 $ unknown.js --baz
 ```
+#### Handling extension
 
 ```js
 #!/usr/bin/env node
