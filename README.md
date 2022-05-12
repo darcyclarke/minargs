@@ -40,6 +40,9 @@ npm install minargs
 - `positionalValues` (`Boolean`)
   - Default: `false`
   - Define whether or not to use positionals that follow bare flag definitions as values
+- `recursive` (`Boolean`)
+  - Default: `false`
+  - Define whether or not to end parsing when a bare `--` marker is found
 
 ### Returned Values
 
