@@ -38,7 +38,7 @@ npm install minargs
   - Note: only single character aliases can be parsed as "shorts" (read more in the **F.A.Q.** below)
 - `positionalValues` (`Boolean`)
   - Default: `false`
-  - Define whether or not to use positionals that follow flags as values
+  - Define whether or not to use positionals that follow bare flag definitions as values
 
 ### Returned Values
 
