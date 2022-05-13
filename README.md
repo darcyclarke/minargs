@@ -25,7 +25,7 @@
 npm install minargs
 ```
 
-### `miargs([argv][, options])`
+### `minargs([argv][, options])`
 
 - `argv` (`Array`)
   - Default: `process.argv`
