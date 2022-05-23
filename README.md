@@ -43,6 +43,10 @@ npm install minargs
 - `recursive` (`Boolean`)
   - Default: `false`
   - Define whether or not to end parsing when a bare `--` marker is found
+🤔 Is `recursive` really essential? it seems to me that it can be fairly
+trivial for the user to be recursively parsing the remainder in case they need
+it, IMO having in mind a lib that strives to be minimal, this part can be
+removed for the sake of simplicity.
 
 ### Returned Values
 
@@ -96,6 +100,13 @@ positionals   // ["-"]
 remainder     // ["--baz"]
 argv          // [ { index: 0, type: 'argument', value: { name: "foo", value: "bar" } } ... ]
 ```
+🤔 I'm confused with the returned value of this example here since it seems to
+conflict a bit with the statement above:
+
+> The `type` `"value"` will only ever be defined -- in place of `"positional"` -- when `positionalValues=true`
+
+What "type value" is this referring to? is it `argv`'s `value` property? Or
+maybe it's a top level property that will replace `positional`?
 
 #### Handling existence
 
@@ -332,6 +343,7 @@ if (args.help) {
 #### Is `--foo` the same as `--foo=true`?
   * No.
   * `--foo` will parse to `{ args: { "foo": [""] } }` & `--foo=true` to ` { args: { "foo": ["true"] } }` respectively
+🙏
 
 #### Are environment variables supported?
   * No.
@@ -364,6 +376,7 @@ if (args.help) {
   * No.
   * `minargs` aligns with the [POSIX Argument Syntax](https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html) here (ie. "Arguments are options if they begin with a hyphen delimiter")
   * `--number -2` will be parsed as `{ args: { "number": [""], "2": [""] } }`
+👍
   * You will have to use explicit value setting to make this association (ex. `--number=-2`) & may further require validation/type coercion to determine if the value is a `Number` (as is shown in the usage examples above)
 
 ### CLI
