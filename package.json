@@ -28,9 +28,9 @@
     "tap": "^15.1.6"
   },
   "bugs": {
-    "url": "https://github.com/darcyclarke/minargs-cli/issues"
+    "url": "https://github.com/darcyclarke/minargs/issues"
   },
-  "homepage": "https://github.com/darcyclarke/minargs-cli#readme",
+  "homepage": "https://github.com/darcyclarke/minargs#readme",
   "keywords": [
     "argument",
     "options",
