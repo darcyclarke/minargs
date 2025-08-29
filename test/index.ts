@@ -1,25 +1,9 @@
-const t = require('tap')
-const { minargs, mainArgs } = require('../dist/index.js')
-
-interface MinArgsResult {
-  args: Record<string, string[]>
-  positionals: string[]
-  remainder: string[]
-  argv: Array<{
-    index: number
-    type: 'process' | 'argument' | 'short' | 'positional' | 'value'
-    value: string | { name: string; value: string }
-  }>
-}
-
-interface MinArgsOptions {
-  alias?: Record<string, string>
-  recursive?: boolean
-  positionalValues?: boolean
-}
+import * as t from 'tap'
+import { minArgs as minargs, mainArgs, MinArgsResult, MinArgsOptions } from '../src/index'
 
 const _process = process
-let result: MinArgsResult, options: MinArgsOptions
+let result: MinArgsResult
+let options: MinArgsOptions
 
 t.beforeEach(t => {
   process = _process
@@ -41,19 +25,19 @@ t.test('minargs : defaults to process.argv when no array passed', t => {
 t.test('minargs : fail silently & return blank result when bad argument', t => {
   t.plan(1)
   result.argv = []
-  t.same(minargs('argv'), result)
+  t.same(minargs('argv' as any), result)
 })
 
 t.test('minargs : handles empty string', t => {
   t.plan(1)
   result.argv = []
-  t.same(minargs(''), result)
+  t.same(minargs('' as any), result)
 })
 
 t.test('minargs : handles null', t => {
   t.plan(1)
   result.argv = []
-  t.same(minargs(null), result)
+  t.same(minargs(null as any), result)
 })
 
 t.test('minargs : handles empty array', t => {
@@ -238,7 +222,7 @@ t.test('minargs : coerces non-string objects to strings', t => {
     { index: 3, type: 'positional', value: 'undefined' },
     { index: 4, type: 'positional', value: 'NaN' }
   ]
-  t.same(minargs([{}, [], null, undefined, NaN], options), result)
+  t.same(minargs([{}, [], null, undefined, NaN] as any, options), result)
 })
 
 t.test('mainArgs : returns 1 when includes -e', t => {
@@ -267,17 +251,112 @@ t.test('mainArgs : returns 1 when includes --print', t => {
 
 t.test('mainArgs : returns 1 when versions.electron isn\'t defaultApp', t => {
   t.plan(1)
-  process.versions = {}
-  process.versions.electron = true
-  process.defaultApp = false
-  t.equal(mainArgs(), 1)
+  const originalVersions = process.versions
+  const originalDefaultApp = (process as any).defaultApp
+  try {
+    Object.defineProperty(process, 'versions', { value: { electron: true }, configurable: true })
+    Object.defineProperty(process, 'defaultApp', { value: false, configurable: true })
+    t.equal(mainArgs(), 1)
+  } finally {
+    Object.defineProperty(process, 'versions', { value: originalVersions, configurable: true })
+    if (originalDefaultApp !== undefined) {
+      Object.defineProperty(process, 'defaultApp', { value: originalDefaultApp, configurable: true })
+    }
+  }
 })
 
 t.test('mainArgs : returns 2 by default', t => {
   t.plan(1)
-  process.versions = {}
-  process.defaultApp = true
-  process.execArgv = []
-  process.versions = false
-  t.equal(mainArgs(), 2)
+  const originalVersions = process.versions
+  const originalDefaultApp = (process as any).defaultApp
+  const originalExecArgv = process.execArgv
+  try {
+    Object.defineProperty(process, 'versions', { value: false, configurable: true })
+    Object.defineProperty(process, 'defaultApp', { value: true, configurable: true })
+    Object.defineProperty(process, 'execArgv', { value: [], configurable: true })
+    t.equal(mainArgs(), 2)
+  } finally {
+    Object.defineProperty(process, 'versions', { value: originalVersions, configurable: true })
+    Object.defineProperty(process, 'execArgv', { value: originalExecArgv, configurable: true })
+    if (originalDefaultApp !== undefined) {
+      Object.defineProperty(process, 'defaultApp', { value: originalDefaultApp, configurable: true })
+    }
+  }
 })
+
+t.test('minargs : handles alias lookup when key does not exist in alias map', t => {
+  t.plan(1)
+  options = {
+    alias: {
+      x: 'other'
+    }
+  }
+  result.args.foo = ['']
+  result.argv = [
+    { index: 0, type: 'argument', value: { name: 'foo', value: '' } }
+  ]
+  t.same(minargs(['--foo'], options), result)
+})
+
+t.test('minargs : handles alias with empty string value falls back to name', t => {
+  t.plan(1)
+  options = {
+    alias: {
+      foo: ''
+    }
+  }
+  result.args.foo = ['']
+  result.argv = [
+    { index: 0, type: 'argument', value: { name: 'foo', value: '' } }
+  ]
+  t.same(minargs(['--foo'], options), result)
+})
+
+t.test('minargs : handles alias with null value falls back to name', t => {
+  t.plan(1)
+  options = {
+    alias: {
+      bar: null as any
+    }
+  }
+  result.args.bar = ['']
+  result.argv = [
+    { index: 0, type: 'argument', value: { name: 'bar', value: '' } }
+  ]
+  t.same(minargs(['--bar'], options), result)
+})
+
+t.test('minargs : handles alias with undefined value falls back to name', t => {
+  t.plan(1)
+  options = {
+    alias: {
+      baz: undefined as any
+    }
+  }
+  result.args.baz = ['']
+  result.argv = [
+    { index: 0, type: 'argument', value: { name: 'baz', value: '' } }
+  ]
+  t.same(minargs(['--baz'], options), result)
+})
+
+t.test('minargs : covers branch where alias exists but name is empty string', t => {
+  t.plan(1)
+  options = {
+    alias: {
+      x: 'mapped'  // alias exists but won't be used
+    }
+  }
+  result.args[''] = ['test']
+  result.argv = [
+    { index: 0, type: 'argument', value: 'test' }
+  ]
+  // This hits the case where options.alias exists but name is empty
+  // So (options.alias && name) is falsy, going to name || '' branch
+  // Since name is '', it should use '' and hit that specific branch
+  t.same(minargs(['--=test'], options), result)
+})
+
+
+
+
