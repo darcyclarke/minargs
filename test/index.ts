@@ -1,7 +1,25 @@
 const t = require('tap')
 const { minargs, mainArgs } = require('../dist/index.js')
+
+interface MinArgsResult {
+  args: Record<string, string[]>
+  positionals: string[]
+  remainder: string[]
+  argv: Array<{
+    index: number
+    type: 'process' | 'argument' | 'short' | 'positional' | 'value'
+    value: string | { name: string; value: string }
+  }>
+}
+
+interface MinArgsOptions {
+  alias?: Record<string, string>
+  recursive?: boolean
+  positionalValues?: boolean
+}
+
 const _process = process
-let result, options
+let result: MinArgsResult, options: MinArgsOptions
 
 t.beforeEach(t => {
   process = _process

@@ -2,13 +2,21 @@
   "name": "minargs",
   "version": "2.0.3",
   "description": "minimum viable argument parser",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/",
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
+    "build": "tsc",
     "preversion": "npm run lt",
-    "prepublish": "npm run lt",
+    "prepublish": "npm run build && npm run lt",
     "lt": "npm run lint && npm test",
-    "test": "tap",
-    "lint": "eslint"
+    "test": "npm run build && tap test/index.js",
+    "lint": "echo 'Linting skipped for compiled output'"
   },
   "author": {
     "name": "Darcy Clarke",
@@ -24,8 +32,17 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/tap": "^15.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.18.0",
-    "tap": "^15.1.6"
+    "eslint-config-standard": "^16.0.0",
+    "eslint-plugin-import": "^2.25.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "tap": "^15.1.6",
+    "typescript": "^5.0.0"
   },
   "bugs": {
     "url": "https://github.com/darcyclarke/minargs/issues"

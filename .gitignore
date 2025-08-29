@@ -1,6 +1,7 @@
 node_modules/
+dist/
+dist-test/
+*.tgz
 .DS_Store
+coverage/
 .nyc_output/
-.npmrc
-package-lock.json
-testing.js

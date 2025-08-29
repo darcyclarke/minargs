@@ -1,8 +1,37 @@
 'use strict'
 
-function minArgs (argv, options = {}) {
+// Extend process interface to include defaultApp property for Electron support
+declare global {
+  namespace NodeJS {
+    interface Process {
+      defaultApp?: boolean
+    }
+  }
+}
+
+// Type definitions
+export interface MinArgsOptions {
+  alias?: Record<string, string>
+  recursive?: boolean
+  positionalValues?: boolean
+}
+
+export interface ArgvItem {
+  index: number
+  type: 'process' | 'argument' | 'short' | 'positional' | 'value'
+  value: string | { name: string; value: string }
+}
+
+export interface MinArgsResult {
+  args: Record<string, string[]>
+  positionals: string[]
+  remainder: string[]
+  argv: ArgvItem[]
+}
+
+export function minArgs(argv?: string[] | MinArgsOptions, options: MinArgsOptions = {}): MinArgsResult {
   // setup result object definitions
-  let result = {
+  let result: MinArgsResult = {
     args: {},
     positionals: [],
     remainder: [],
@@ -11,11 +40,11 @@ function minArgs (argv, options = {}) {
   let defaulted = false
 
   // set positional, arg & values
-  function store (index, type, name, value) {
+  function store(index: number, type: ArgvItem['type'], name: string | null, value?: string): void {
     // check the type of item being stored
     if (type === 'argument' || type === 'short') {
       // check for aliases
-      let alias = options.alias[name] || name
+      let alias = (options.alias && name) ? options.alias[name] || name : name || ''
 
       // check if we should store values
       value = (typeof value !== 'undefined') ? value : ''
@@ -32,7 +61,7 @@ function minArgs (argv, options = {}) {
     result.argv.push({
       index,
       type,
-      value: name ? { name, value } : value
+      value: name ? { name, value: value || '' } : (value || '')
     })
   }
 
@@ -41,7 +70,7 @@ function minArgs (argv, options = {}) {
       typeof arguments[0] === 'object' &&
       !Array.isArray(arguments[0]) &&
       argv != null) {
-    options = arguments[0]
+    options = arguments[0] as MinArgsOptions
     argv = process.argv
     defaulted = true
   }
@@ -58,7 +87,7 @@ function minArgs (argv, options = {}) {
   }
 
   // set option defaults
-  const defaults = {
+  const defaults: MinArgsOptions = {
     alias: {},
     recursive: false,
     positionalValues: false
@@ -77,7 +106,7 @@ function minArgs (argv, options = {}) {
   // walk args
   let index = start
   while (index < argv.length) {
-    let type = ''
+    let type: 'argument' | 'short' | null = null
     let arg = String(argv[index])
 
     // Handle args
@@ -109,13 +138,13 @@ function minArgs (argv, options = {}) {
           const parts = arg.split('=')
           // expand & set short existence
           const shorts = parts[0].split('')
-          shorts.slice(0, -1).map(short => store(index, type, short, ''))
+          shorts.slice(0, -1).map(short => store(index, 'short', short, ''))
           arg = shorts[shorts.length - 1] + '=' + parts[1]
 
         // set arg to last short for usage by positional values
         } else {
           const shorts = arg.split('')
-          shorts.slice(0, -1).map(short => store(index, type, short, ''))
+          shorts.slice(0, -1).map(short => store(index, 'short', short, ''))
           arg = shorts[shorts.length - 1]
         }
       } else {
@@ -160,7 +189,7 @@ function minArgs (argv, options = {}) {
 // https://github.com/pkgjs/parseargs
 // https://github.com/pkgjs/parseargs/blob/main/index.js
 
-function mainArgs () {
+export function mainArgs(): number {
   // This function is a placeholder for proposed process.mainArgs.
   // Work out where to slice process.argv for user supplied arguments.
 
@@ -194,6 +223,14 @@ function mainArgs () {
   return 2
 }
 
+// Export for CommonJS compatibility
+export default {
+  minargs: minArgs,
+  minArgs,
+  mainArgs
+}
+
+// Also export using module.exports for full CommonJS compatibility
 module.exports = {
   minargs: minArgs,
   minArgs,
